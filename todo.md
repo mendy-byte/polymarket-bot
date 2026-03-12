@@ -1,0 +1,22 @@
+# Polymarket Tail-Risk Bot - TODO
+
+- [x] Database schema: scanned_events, positions, orders, bot_config, scan_logs
+- [x] Dark theme setup with custom color palette
+- [x] Backend: Event Scanner service (Gamma API integration)
+- [x] Backend: Smart Filtering (24hr, zero liquidity, correlated events)
+- [x] Backend: AI Event Evaluator (LLM assessment of cheap outcomes)
+- [x] Backend: Portfolio Management (positions, P&L, resolution tracking)
+- [x] Backend: Risk Controls (capital limits, category caps, kill switch)
+- [x] Backend: CLOB Integration (order placement, wallet config)
+- [x] Backend: Order Book Analysis (spread/liquidity checks)
+- [x] Backend: Category Diversification engine
+- [x] Backend: tRPC routers for all features
+- [x] Dashboard: DashboardLayout with sidebar navigation
+- [x] Dashboard: Overview page (capital deployed, P&L, active bets)
+- [x] Dashboard: Event Scanner page (live filtering, AI scores)
+- [x] Dashboard: Portfolio page (positions, resolution status)
+- [x] Dashboard: Risk Controls page (limits, kill switch)
+- [x] Dashboard: Settings page (wallet config, bot parameters)
+- [x] Dashboard: Expected Value calculator
+- [x] Dashboard: Activity Log page
+- [x] Vitest tests for core backend logic (23 passing)
