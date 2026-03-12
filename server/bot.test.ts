@@ -119,7 +119,7 @@ describe("risk.config", () => {
     const result = await caller.risk.config();
     expect(result).toBeDefined();
     expect(result.maxTotalCapital).toBe(2000);
-    expect(result.maxPerEvent).toBe(5);
+    expect(result.maxPerEvent).toBe(25);
     expect(result.maxCategoryPercent).toBe(30);
     expect(result.dailyBuyBudget).toBe(200);
     expect(result.minPrice).toBe(0.001);

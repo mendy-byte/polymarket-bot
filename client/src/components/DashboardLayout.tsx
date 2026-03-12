@@ -30,6 +30,7 @@ import {
   ShieldAlert,
   Settings,
   Activity,
+  Bot,
 } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
@@ -38,6 +39,7 @@ import { Button } from "./ui/button";
 
 const menuItems = [
   { icon: LayoutDashboard, label: "Overview", path: "/" },
+  { icon: Bot, label: "Autopilot", path: "/autopilot" },
   { icon: Radar, label: "Event Scanner", path: "/scanner" },
   { icon: Briefcase, label: "Portfolio", path: "/portfolio" },
   { icon: ShieldAlert, label: "Risk Controls", path: "/risk" },

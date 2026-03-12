@@ -7,6 +7,7 @@ import { z } from "zod";
 import * as db from "./db";
 import { scanForCheapOutcomes, analyzeOrderbook } from "./services/gammaApi";
 import { evaluateBatch, evaluateSingle } from "./services/aiEvaluator";
+import { startAutopilot, stopAutopilot, runSingleCycle, getAutopilotStatus } from "./services/autopilot";
 import type { ParsedCheapOutcome } from "./services/gammaApi";
 
 export const appRouter = router({
@@ -191,7 +192,7 @@ export const appRouter = router({
     }),
     placeOrder: protectedProcedure.input(z.object({
       scannedEventId: z.number(),
-      amountUsd: z.number().min(0.05).max(10),
+      amountUsd: z.number().min(0.05).max(25),
     })).mutation(async ({ input }) => {
       // Get config for risk checks
       const configRows = await db.getAllConfig();
@@ -379,6 +380,78 @@ export const appRouter = router({
         percentage: totalCost > 0 ? (data.totalCost / totalCost) * 100 : 0,
         limit: maxCategoryPercent,
       })).sort((a, b) => b.totalCost - a.totalCost);
+    }),
+  }),
+
+  // ===== Autopilot =====
+  autopilot: router({
+    status: protectedProcedure.query(async () => {
+      const status = getAutopilotStatus();
+      const configRows = await db.getAllConfig();
+      const configMap = new Map(configRows.map(c => [c.key, c.value]));
+      return {
+        ...status,
+        intervalHours: parseFloat(configMap.get("autopilotInterval") || "4"),
+        maxOrdersPerCycle: parseInt(configMap.get("autopilotMaxOrders") || "50"),
+        scanPages: parseInt(configMap.get("autopilotScanPages") || "30"),
+        autopilotEnabled: configMap.get("autopilotEnabled") === "true",
+      };
+    }),
+    start: protectedProcedure.input(z.object({
+      intervalHours: z.number().min(1).max(24).optional(),
+    }).optional()).mutation(async ({ input }) => {
+      const configRows = await db.getAllConfig();
+      const configMap = new Map(configRows.map(c => [c.key, c.value]));
+
+      if (configMap.get("killSwitch") === "true") {
+        throw new Error("Cannot start autopilot: kill switch is active");
+      }
+      if (configMap.get("botEnabled") !== "true") {
+        throw new Error("Cannot start autopilot: bot is not enabled. Enable it in Risk Controls first.");
+      }
+
+      const interval = input?.intervalHours || parseFloat(configMap.get("autopilotInterval") || "4");
+      await db.setConfig("autopilotEnabled", "true", "Autopilot enabled");
+      await db.setConfig("autopilotInterval", String(interval), "Autopilot interval in hours");
+      await startAutopilot(interval);
+      await db.createScanLog({ action: "autopilot_start", details: `Autopilot started with ${interval}h interval` });
+      return { success: true, interval };
+    }),
+    stop: protectedProcedure.mutation(async () => {
+      stopAutopilot();
+      await db.setConfig("autopilotEnabled", "false", "Autopilot disabled");
+      await db.createScanLog({ action: "autopilot_stop", details: "Autopilot stopped" });
+      return { success: true };
+    }),
+    runOnce: protectedProcedure.mutation(async () => {
+      const configRows = await db.getAllConfig();
+      const configMap = new Map(configRows.map(c => [c.key, c.value]));
+
+      if (configMap.get("killSwitch") === "true") {
+        throw new Error("Cannot run cycle: kill switch is active");
+      }
+      if (configMap.get("botEnabled") !== "true") {
+        throw new Error("Cannot run cycle: bot is not enabled");
+      }
+
+      const stats = await runSingleCycle();
+      return stats;
+    }),
+    updateConfig: protectedProcedure.input(z.object({
+      intervalHours: z.number().min(1).max(24).optional(),
+      maxOrdersPerCycle: z.number().min(1).max(200).optional(),
+      scanPages: z.number().min(5).max(100).optional(),
+    })).mutation(async ({ input }) => {
+      if (input.intervalHours !== undefined) {
+        await db.setConfig("autopilotInterval", String(input.intervalHours), "Autopilot interval in hours");
+      }
+      if (input.maxOrdersPerCycle !== undefined) {
+        await db.setConfig("autopilotMaxOrders", String(input.maxOrdersPerCycle), "Max orders per autopilot cycle");
+      }
+      if (input.scanPages !== undefined) {
+        await db.setConfig("autopilotScanPages", String(input.scanPages), "Pages to scan per autopilot cycle");
+      }
+      return { success: true };
     }),
   }),
 

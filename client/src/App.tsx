@@ -10,11 +10,13 @@ import Portfolio from "./pages/Portfolio";
 import Risk from "./pages/Risk";
 import Logs from "./pages/Logs";
 import Settings from "./pages/Settings";
+import Autopilot from "./pages/Autopilot";
 
 function Router() {
   return (
     <Switch>
       <Route path={"/"} component={Home} />
+      <Route path={"/autopilot"} component={Autopilot} />
       <Route path={"/scanner"} component={Scanner} />
       <Route path={"/portfolio"} component={Portfolio} />
       <Route path={"/risk"} component={Risk} />

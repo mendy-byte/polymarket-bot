@@ -19,4 +19,10 @@
 - [x] Dashboard: Settings page (wallet config, bot parameters)
 - [x] Dashboard: Expected Value calculator
 - [x] Dashboard: Activity Log page
-- [x] Vitest tests for core backend logic (23 passing)
+- [x] Vitest tests for core backend logic (38 passing)
+- [x] Autonomous scan-evaluate-buy loop (background job every 4-6 hours)
+- [x] Smart bet sizing ($5-$25 based on AI confidence score)
+- [x] Bulk order pipeline (batch 50-100+ orders per run)
+- [x] Auto-resolution tracker (check resolved markets, update P&L)
+- [x] Autopilot controls on dashboard (enable/disable, interval, status)
+- [x] Loop status display (last run, next run, orders placed, events found)

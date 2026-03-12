@@ -15,7 +15,7 @@ export interface RiskConfig {
 
 export const DEFAULT_RISK_CONFIG: RiskConfig = {
   maxTotalCapital: 2000,
-  maxPerEvent: 5,
+  maxPerEvent: 25,
   maxCategoryPercent: 30,
   dailyBuyBudget: 200,
   minPrice: 0.001,

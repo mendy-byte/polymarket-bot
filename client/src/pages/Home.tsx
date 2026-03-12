@@ -17,6 +17,7 @@ import {
   Clock,
   Loader2,
   AlertTriangle,
+  Bot,
 } from "lucide-react";
 
 function formatUsd(val: number): string {
@@ -95,6 +96,9 @@ function OverviewContent() {
   const { data: logs } = trpc.dashboard.recentLogs.useQuery(undefined, {
     refetchInterval: 30000,
   });
+  const { data: autopilotStatus } = trpc.autopilot.status.useQuery(undefined, {
+    refetchInterval: 10000,
+  });
 
   if (isLoading) {
     return (
@@ -145,12 +149,18 @@ function OverviewContent() {
               Kill Switch Active
             </Badge>
           )}
+          {autopilotStatus?.isRunning && (
+            <Badge variant="default" className="gap-1 bg-profit text-white">
+              <Bot className="h-3 w-3" />
+              Autopilot Active
+            </Badge>
+          )}
           <Badge
             variant={s.botEnabled ? "default" : "secondary"}
             className="gap-1"
           >
             <Activity className="h-3 w-3" />
-            {s.botEnabled ? "Bot Running" : "Bot Stopped"}
+            {s.botEnabled ? "Bot Enabled" : "Bot Disabled"}
           </Badge>
         </div>
       </div>
