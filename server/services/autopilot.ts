@@ -25,7 +25,7 @@
 
 import { scanForCheapOutcomes, analyzeOrderbook } from "./gammaApi";
 import { evaluateBatch } from "./aiEvaluator";
-import { placeLimitOrder, initializeClobClient, getClobStatus } from "./clobTrader";
+import { placeLimitOrder, initializeClobClient, getClobStatus, checkOrderFills } from "./clobTrader";
 import type { TickSize as ClobTickSize } from "@polymarket/clob-client";
 import type { ParsedCheapOutcome } from "./gammaApi";
 import * as db from "../db";
@@ -54,6 +54,10 @@ export interface AutopilotRunStats {
   losses: number;
   categoriesUsed: number;
   categoryBreakdown: Record<string, number>;
+  fillsChecked: number;
+  fillsFilled: number;
+  fillsCancelled: number;
+  fillsOpen: number;
   errors: string[];
 }
 
@@ -248,6 +252,10 @@ async function runCycle(): Promise<AutopilotRunStats> {
     losses: 0,
     categoriesUsed: 0,
     categoryBreakdown: {},
+    fillsChecked: 0,
+    fillsFilled: 0,
+    fillsCancelled: 0,
+    fillsOpen: 0,
     errors: [],
   };
 
@@ -276,7 +284,7 @@ async function runCycle(): Promise<AutopilotRunStats> {
     const minLiquidity = parseFloat(configMap.get("minLiquidity") || String(DEFAULT_RISK_CONFIG.minLiquidity));
     const minHours = parseFloat(configMap.get("minHoursToResolution") || String(DEFAULT_RISK_CONFIG.minHoursToResolution));
     const minAiScore = parseFloat(configMap.get("minAiScore") || "3");
-    const scanPages = parseInt(configMap.get("autopilotScanPages") || "30");
+    const scanPages = parseInt(configMap.get("autopilotScanPages") || "75");
 
     // Flat bet size: $5 per event (the planktonXD way)
     const flatBetSize = Math.min(5, maxPerEvent);
@@ -533,6 +541,22 @@ async function runCycle(): Promise<AutopilotRunStats> {
     stats.categoryBreakdown = Object.fromEntries(cycleCategories);
     stats.categoriesUsed = cycleCategories.size;
 
+    // ===== STEP 7: Check fill status of existing orders =====
+    console.log("[Autopilot] Step 6: Checking order fill status...");
+    try {
+      const placedOrderIds = await db.getPlacedOrderIds();
+      if (placedOrderIds.length > 0) {
+        const fillStats = await checkOrderFills(placedOrderIds);
+        stats.fillsChecked = fillStats.checked;
+        stats.fillsFilled = fillStats.filled;
+        stats.fillsCancelled = fillStats.cancelled;
+        stats.fillsOpen = fillStats.open;
+        console.log(`[Autopilot] Fill check: ${fillStats.checked} checked, ${fillStats.filled} filled, ${fillStats.partial} partial, ${fillStats.cancelled} cancelled, ${fillStats.open} open`);
+      }
+    } catch (fillErr: any) {
+      console.error("[Autopilot] Fill check error:", fillErr.message);
+    }
+
     stats.completedAt = new Date();
     await logCycle(stats);
     return stats;
@@ -558,6 +582,7 @@ async function logCycle(stats: AutopilotRunStats) {
     `Orders: ${stats.ordersPlaced} ($${stats.totalSpent.toFixed(2)}) across ${stats.categoriesUsed} categories`,
     catSummary ? `Categories: ${catSummary}` : "",
     `Resolutions: ${stats.wins}W/${stats.losses}L`,
+    stats.fillsChecked > 0 ? `Fills: ${stats.fillsFilled} filled, ${stats.fillsCancelled} cancelled, ${stats.fillsOpen} open (of ${stats.fillsChecked})` : "",
     stats.errors.length > 0 ? `Errors: ${stats.errors.slice(0, 3).join("; ")}` : "",
   ].filter(Boolean).join(" | ");
 

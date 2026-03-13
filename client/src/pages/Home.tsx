@@ -99,6 +99,9 @@ function OverviewContent() {
   const { data: autopilotStatus } = trpc.autopilot.status.useQuery(undefined, {
     refetchInterval: 10000,
   });
+  const { data: fillStats } = trpc.dashboard.fillStats.useQuery(undefined, {
+    refetchInterval: 30000,
+  });
 
   if (isLoading) {
     return (
@@ -274,6 +277,60 @@ function OverviewContent() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Order Fill Rate */}
+      {fillStats && fillStats.total > 0 && (
+        <Card className="bg-card border-border">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base font-medium text-foreground">
+              Order Fill Rate
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
+              <div>
+                <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Total Orders</p>
+                <p className="text-lg font-mono text-foreground">{fillStats.total}</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Filled</p>
+                <p className="text-lg font-mono text-profit">{fillStats.filled}</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Pending/Placed</p>
+                <p className="text-lg font-mono text-warning">{fillStats.pending + fillStats.placed}</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Partial</p>
+                <p className="text-lg font-mono text-primary">{fillStats.partial}</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Cancelled</p>
+                <p className="text-lg font-mono text-muted-foreground">{fillStats.cancelled}</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Fill Rate</p>
+                <p className={`text-lg font-mono ${fillStats.filled / fillStats.total > 0.5 ? "text-profit" : "text-warning"}`}>
+                  {((fillStats.filled / fillStats.total) * 100).toFixed(0)}%
+                </p>
+              </div>
+            </div>
+            {/* Fill rate bar */}
+            <div className="mt-4 h-3 bg-muted rounded-full overflow-hidden flex">
+              <div className="bg-profit h-full transition-all" style={{ width: `${(fillStats.filled / fillStats.total) * 100}%` }} />
+              <div className="bg-primary h-full transition-all" style={{ width: `${(fillStats.partial / fillStats.total) * 100}%` }} />
+              <div className="bg-warning h-full transition-all" style={{ width: `${((fillStats.pending + fillStats.placed) / fillStats.total) * 100}%` }} />
+              <div className="bg-muted-foreground/30 h-full transition-all" style={{ width: `${((fillStats.cancelled + fillStats.failed) / fillStats.total) * 100}%` }} />
+            </div>
+            <div className="flex gap-4 mt-2 text-xs text-muted-foreground">
+              <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-profit" />Filled</span>
+              <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-primary" />Partial</span>
+              <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-warning" />Pending</span>
+              <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-muted-foreground/30" />Cancelled/Failed</span>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Category Breakdown + Recent Activity */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

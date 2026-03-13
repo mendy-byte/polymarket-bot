@@ -1,0 +1,22 @@
+{
+  "query": "SELECT `key`, `value` FROM bot_config WHERE `key` IN ('killSwitch', 'botEnabled', 'autopilotEnabled');",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3qjSsefs24zghQG.d5f38dec7f6c --database YZ9v9D6zNEEycYVBBKJ8og --execute SELECT `key`, `value` FROM bot_config WHERE `key` IN ('killSwitch', 'botEnabled', 'autopilotEnabled');",
+  "rows": [
+    {
+      "key": "killSwitch",
+      "value": "false"
+    },
+    {
+      "key": "botEnabled",
+      "value": "false"
+    },
+    {
+      "key": "autopilotEnabled",
+      "value": "true"
+    }
+  ],
+  "messages": [],
+  "stdout": "key\tvalue\nkillSwitch\tfalse\nbotEnabled\tfalse\nautopilotEnabled\ttrue\n",
+  "stderr": "",
+  "execution_time_ms": 60
+}

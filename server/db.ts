@@ -198,6 +198,39 @@ export async function updateOrderStatus(id: number, status: string, errorMessage
   await db.update(orders).set(update).where(eq(orders.id, id));
 }
 
+export async function updateOrderStatusByOrderId(orderId: string, status: string, filledAt?: Date) {
+  const db = await getDb();
+  if (!db) return;
+  const update: Record<string, any> = { status: status as any };
+  if (filledAt) update.filledAt = filledAt;
+  await db.update(orders).set(update).where(eq(orders.orderId, orderId));
+}
+
+export async function getPlacedOrderIds(): Promise<string[]> {
+  const db = await getDb();
+  if (!db) return [];
+  const result = await db.select({ orderId: orders.orderId })
+    .from(orders)
+    .where(inArray(orders.status, ["placed", "pending", "partial"] as any));
+  return result.map(r => r.orderId).filter((id): id is string => !!id);
+}
+
+export async function getOrderFillStats(): Promise<{ total: number; filled: number; partial: number; cancelled: number; pending: number; placed: number; failed: number }> {
+  const db = await getDb();
+  if (!db) return { total: 0, filled: 0, partial: 0, cancelled: 0, pending: 0, placed: 0, failed: 0 };
+  const allOrders = await db.select({ status: orders.status }).from(orders);
+  const stats = { total: allOrders.length, filled: 0, partial: 0, cancelled: 0, pending: 0, placed: 0, failed: 0 };
+  for (const o of allOrders) {
+    if (o.status === "filled") stats.filled++;
+    else if (o.status === "partial") stats.partial++;
+    else if (o.status === "cancelled") stats.cancelled++;
+    else if (o.status === "pending") stats.pending++;
+    else if (o.status === "placed") stats.placed++;
+    else if (o.status === "failed") stats.failed++;
+  }
+  return stats;
+}
+
 // ===== Bot Config =====
 export async function getConfig(key: string): Promise<string | null> {
   const db = await getDb();

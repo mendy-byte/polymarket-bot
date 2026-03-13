@@ -451,6 +451,94 @@ export function getClobStatus(): {
 }
 
 /**
+ * Check the status of an order on the CLOB.
+ * Returns the order's current status and fill information.
+ */
+export async function checkOrderStatus(orderId: string): Promise<{
+  status: string;
+  originalSize: string;
+  sizeMatched: string;
+  fillPercent: number;
+} | null> {
+  try {
+    const client = await getClient();
+    const order = await client.getOrder(orderId);
+    if (!order) return null;
+
+    const originalSize = parseFloat(order.original_size || "0");
+    const sizeMatched = parseFloat(order.size_matched || "0");
+    const fillPercent = originalSize > 0 ? (sizeMatched / originalSize) * 100 : 0;
+
+    return {
+      status: order.status,
+      originalSize: order.original_size,
+      sizeMatched: order.size_matched,
+      fillPercent,
+    };
+  } catch (err: any) {
+    // Order may have expired or been removed
+    console.error(`[CLOB] Check order ${orderId} failed:`, err.message);
+    return null;
+  }
+}
+
+/**
+ * Check fill status for multiple orders.
+ * Updates the database with current fill information.
+ */
+export async function checkOrderFills(orderIds: string[]): Promise<{
+  checked: number;
+  filled: number;
+  partial: number;
+  cancelled: number;
+  open: number;
+  errors: number;
+}> {
+  const stats = { checked: 0, filled: 0, partial: 0, cancelled: 0, open: 0, errors: 0 };
+
+  for (const orderId of orderIds) {
+    if (!orderId || orderId === "unknown" || orderId.startsWith("batch-")) {
+      stats.errors++;
+      continue;
+    }
+
+    try {
+      const result = await checkOrderStatus(orderId);
+      stats.checked++;
+
+      if (!result) {
+        // Order not found - likely expired/cancelled
+        await db.updateOrderStatusByOrderId(orderId, "cancelled");
+        stats.cancelled++;
+        continue;
+      }
+
+      const status = result.status.toLowerCase();
+      if (status === "matched" || result.fillPercent >= 99.9) {
+        await db.updateOrderStatusByOrderId(orderId, "filled", new Date());
+        stats.filled++;
+      } else if (result.fillPercent > 0) {
+        await db.updateOrderStatusByOrderId(orderId, "partial");
+        stats.partial++;
+      } else if (status === "cancelled" || status === "expired") {
+        await db.updateOrderStatusByOrderId(orderId, "cancelled");
+        stats.cancelled++;
+      } else {
+        // Still open/live
+        stats.open++;
+      }
+
+      // Rate limit: 100ms between checks
+      await new Promise(r => setTimeout(r, 100));
+    } catch (err: any) {
+      stats.errors++;
+    }
+  }
+
+  return stats;
+}
+
+/**
  * Shutdown the CLOB client cleanly.
  */
 export function shutdownClob() {

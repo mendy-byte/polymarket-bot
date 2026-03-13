@@ -58,3 +58,7 @@
 - [x] Add short-dated event mixing: interleave 2 short (<30d) per 1 long event for faster resolution
 - [x] Shorten autopilot cycle interval to 2 hours (default changed from 4h)
 - [x] Enable autopilot and trigger first diversified cycle (26 positions across 5 categories)
+- [x] Fix kill switch issue: UI Switch double-fire prevented with isPending guard + botEnabled re-enabled in DB
+- [x] Increase scan pages from 50 to 75 per cycle (default + DB config)
+- [x] Add order fill rate tracking: checkOrderFills() in clobTrader, runs each cycle, dashboard shows fill rate bar
+- [x] Note: planktonXD started with $1K in Feb 2025

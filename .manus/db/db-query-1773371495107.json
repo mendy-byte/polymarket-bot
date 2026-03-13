@@ -1,0 +1,26 @@
+{
+  "query": "SELECT `key`, `value` FROM bot_config WHERE `key` = 'killSwitch'; SELECT id, action, details, createdAt FROM scan_logs WHERE details LIKE '%kill%' OR details LIKE '%Kill%' ORDER BY id DESC LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3qjSsefs24zghQG.d5f38dec7f6c --database YZ9v9D6zNEEycYVBBKJ8og --execute SELECT `key`, `value` FROM bot_config WHERE `key` = 'killSwitch'; SELECT id, action, details, createdAt FROM scan_logs WHERE details LIKE '%kill%' OR details LIKE '%Kill%' ORDER BY id DESC LIMIT 10;",
+  "rows": [
+    {
+      "key": "killSwitch",
+      "value": "false"
+    }
+  ],
+  "messages": [
+    "id\taction\tdetails\tcreatedAt",
+    "30037\tkill_switch\tKill switch deactivated\t2026-03-13 03:07:29",
+    "30036\tkill_switch\tKill switch ACTIVATED\t2026-03-13 03:07:29",
+    "30025\tkill_switch\tKill switch deactivated\t2026-03-13 02:51:52",
+    "30024\tkill_switch\tKill switch ACTIVATED\t2026-03-13 02:51:52",
+    "30021\tkill_switch\tKill switch deactivated\t2026-03-13 02:51:19",
+    "30020\tkill_switch\tKill switch ACTIVATED\t2026-03-13 02:51:19",
+    "30014\tkill_switch\tKill switch deactivated\t2026-03-13 01:52:02",
+    "30013\tkill_switch\tKill switch ACTIVATED\t2026-03-13 01:52:02",
+    "30010\tkill_switch\tKill switch deactivated\t2026-03-13 01:51:15",
+    "30009\tkill_switch\tKill switch ACTIVATED\t2026-03-13 01:51:15"
+  ],
+  "stdout": "key\tvalue\nkillSwitch\tfalse\nid\taction\tdetails\tcreatedAt\n30037\tkill_switch\tKill switch deactivated\t2026-03-13 03:07:29\n30036\tkill_switch\tKill switch ACTIVATED\t2026-03-13 03:07:29\n30025\tkill_switch\tKill switch deactivated\t2026-03-13 02:51:52\n30024\tkill_switch\tKill switch ACTIVATED\t2026-03-13 02:51:52\n30021\tkill_switch\tKill switch deactivated\t2026-03-13 02:51:19\n30020\tkill_switch\tKill switch ACTIVATED\t2026-03-13 02:51:19\n30014\tkill_switch\tKill switch deactivated\t2026-03-13 01:52:02\n30013\tkill_switch\tKill switch ACTIVATED\t2026-03-13 01:52:02\n30010\tkill_switch\tKill switch deactivated\t2026-03-13 01:51:15\n30009\tkill_switch\tKill switch ACTIVATED\t2026-03-13 01:51:15\n",
+  "stderr": "",
+  "execution_time_ms": 99
+}

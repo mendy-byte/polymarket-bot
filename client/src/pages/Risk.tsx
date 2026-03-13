@@ -82,7 +82,10 @@ function RiskContent() {
               </div>
               <Switch
                 checked={config?.killSwitch || false}
-                onCheckedChange={(checked) => killMutation.mutate({ enabled: checked })}
+                onCheckedChange={(checked) => {
+                  if (!killMutation.isPending) killMutation.mutate({ enabled: checked });
+                }}
+                disabled={killMutation.isPending}
                 className="data-[state=checked]:bg-loss"
               />
             </div>
@@ -103,7 +106,10 @@ function RiskContent() {
               </div>
               <Switch
                 checked={config?.botEnabled || false}
-                onCheckedChange={(checked) => botToggle.mutate({ enabled: checked })}
+                onCheckedChange={(checked) => {
+                  if (!botToggle.isPending) botToggle.mutate({ enabled: checked });
+                }}
+                disabled={botToggle.isPending}
               />
             </div>
           </CardContent>
