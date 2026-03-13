@@ -117,7 +117,7 @@ function enableProxy(socksUrl: string): boolean {
  * If proxy fails all retries, fall back to direct (read-only mode — scanning works, trading won't).
  */
 export async function initializeConnection(): Promise<"proxy" | "direct" | "failed"> {
-  const socksUrl = process.env.SOCKS5_PROXY_URL || "socks5://152.42.139.184:1080";
+  const socksUrl = process.env.SOCKS5_PROXY_URL || "socks5://polybot:pr0xyS3cure2026@152.42.139.184:1080";
   const MAX_RETRIES = 3;
   const RETRY_DELAYS = [2000, 5000, 10000]; // 2s, 5s, 10s
 
@@ -152,7 +152,7 @@ export async function initializeConnection(): Promise<"proxy" | "direct" | "fail
  * Initialize the proxy (legacy API — now calls initializeConnection).
  */
 export function initializeProxy(proxyUrl?: string): boolean {
-  const socksUrl = proxyUrl || process.env.SOCKS5_PROXY_URL || "socks5://152.42.139.184:1080";
+  const socksUrl = proxyUrl || process.env.SOCKS5_PROXY_URL || "socks5://polybot:pr0xyS3cure2026@152.42.139.184:1080";
   return enableProxy(socksUrl);
 }
 
@@ -183,7 +183,7 @@ export function canTrade(): boolean {
 export function getProxyStatus(): { active: boolean; url: string; mode: string } {
   return {
     active: isProxyActive,
-    url: process.env.SOCKS5_PROXY_URL || "socks5://152.42.139.184:1080",
+    url: process.env.SOCKS5_PROXY_URL || "socks5://polybot:pr0xyS3cure2026@152.42.139.184:1080",
     mode: connectionMode,
   };
 }

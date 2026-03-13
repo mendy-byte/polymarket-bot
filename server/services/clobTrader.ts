@@ -26,6 +26,11 @@ let heartbeatId = "";
 let isInitialized = false;
 let initError: string | null = null;
 
+// Heartbeat health tracking
+let consecutiveHeartbeatFailures = 0;
+const MAX_HEARTBEAT_FAILURES = 3; // Stop heartbeat after 3 consecutive failures
+let heartbeatPaused = false;
+
 export interface ClobCredentials {
   apiKey: string;
   secret: string;
@@ -130,7 +135,10 @@ export async function initializeClobClient(): Promise<{ success: boolean; error?
     isInitialized = true;
     initError = null;
 
-    // Start heartbeat
+    // Reset heartbeat state and start fresh
+    consecutiveHeartbeatFailures = 0;
+    heartbeatPaused = false;
+    heartbeatId = ""; // Reset heartbeat ID so we get a fresh one
     startHeartbeat();
 
     console.log("[CLOB] Client initialized successfully");
@@ -173,21 +181,55 @@ async function getClient(): Promise<ClobClient> {
  * Maintain heartbeat to keep orders alive.
  * Polymarket requires a heartbeat every 10 seconds or orders get cancelled.
  * We send every 5 seconds to be safe.
+ * 
+ * Error handling:
+ * - After MAX_HEARTBEAT_FAILURES consecutive failures, pause the heartbeat loop
+ * - The heartbeat will be restarted on next successful CLOB client initialization
+ * - "Invalid Heartbeat ID" errors (400) indicate a stale session — we reset and get a fresh ID
  */
 function startHeartbeat() {
   if (heartbeatTimer) {
     clearInterval(heartbeatTimer);
   }
 
+  consecutiveHeartbeatFailures = 0;
+  heartbeatPaused = false;
+
   heartbeatTimer = setInterval(async () => {
     if (!clobClient || !isInitialized) return;
+    if (heartbeatPaused) return;
 
     try {
-      const resp = await clobClient.postHeartbeat(heartbeatId);
-      heartbeatId = resp.heartbeat_id || "";
+      // Temporarily suppress console.error/log to prevent the CLOB library
+      // from spamming massive error objects to the log
+      const origError = console.error;
+      const origLog = console.log;
+      console.error = () => {};
+      console.log = () => {};
+      
+      let resp: any;
+      try {
+        resp = await clobClient.postHeartbeat(heartbeatId);
+      } finally {
+        // Always restore console
+        console.error = origError;
+        console.log = origLog;
+      }
+      
+      heartbeatId = resp?.heartbeat_id || "";
+      // Reset failure counter on success
+      consecutiveHeartbeatFailures = 0;
     } catch (_err: any) {
-      // Heartbeat failures are non-fatal - silently ignore
-      // The CLOB client dumps massive circular JSON on heartbeat errors
+      consecutiveHeartbeatFailures++;
+
+      // On any failure, reset heartbeat ID to try getting a fresh one
+      heartbeatId = "";
+
+      if (consecutiveHeartbeatFailures >= MAX_HEARTBEAT_FAILURES) {
+        heartbeatPaused = true;
+        const errMsg = _err?.response?.data?.error || _err?.message || "unknown";
+        console.warn(`[CLOB] Heartbeat paused after ${MAX_HEARTBEAT_FAILURES} consecutive failures (last: ${errMsg}). Will resume on next client init.`);
+      }
     }
   }, 5000);
 }
@@ -201,6 +243,8 @@ export function stopHeartbeat() {
     heartbeatTimer = null;
   }
   heartbeatId = "";
+  consecutiveHeartbeatFailures = 0;
+  heartbeatPaused = false;
 }
 
 /**
@@ -458,11 +502,15 @@ export function getClobStatus(): {
   initialized: boolean;
   error: string | null;
   heartbeatActive: boolean;
+  heartbeatPaused: boolean;
+  heartbeatFailures: number;
 } {
   return {
     initialized: isInitialized,
     error: initError,
     heartbeatActive: !!heartbeatTimer,
+    heartbeatPaused,
+    heartbeatFailures: consecutiveHeartbeatFailures,
   };
 }
 

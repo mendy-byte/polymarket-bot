@@ -63,10 +63,12 @@
 - [x] Add order fill rate tracking: checkOrderFills() in clobTrader, runs each cycle, dashboard shows fill rate bar
 - [x] Note: planktonXD started with $1K in Feb 2025
 - [x] Add expiry/resolution date column to portfolio page with time-until-expiry display
-- [ ] Fix CLOB proxy connection: add fallback to direct connection when proxy is down
-- [ ] Make CLOB init retry with fallback so bot works seamlessly regardless of proxy status
-- [ ] Set up new SOCKS5 proxy server for Polymarket trading (old one at 152.42.139.184 is down)
+- [x] Fix CLOB proxy connection: add fallback to direct connection when proxy is down
+- [x] Make CLOB init retry with fallback so bot works seamlessly regardless of proxy status
+- [x] Set up new SOCKS5 proxy server for Polymarket trading (restored microsocks on 152.42.139.184 with auth + systemd)
 - [x] Adjust short:long event ratio from 2:1 to 4:1 to match planktonXD's heavy short-dated focus
 - [x] Add resolved positions summary view to Portfolio page (win/loss history, P&L by category, resolution timeline)
 - [x] Fix daily budget reset to use EST timezone instead of UTC
 - [x] Add Refresh Prices button to Portfolio page (fetch current market prices for all open positions on demand)
+- [x] Fix CLOB heartbeat error loop (stop spamming Invalid Heartbeat ID errors, add reconnect-on-error logic)
+- [x] Resolve proxy issue for Polymarket trading (fixed microsocks on Amsterdam droplet, added auth, systemd auto-restart)
