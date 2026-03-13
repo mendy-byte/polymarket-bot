@@ -1,0 +1,26 @@
+{
+  "query": "INSERT INTO bot_config (`key`, `value`, description) VALUES ('botEnabled', 'true', 'Bot enabled') ON DUPLICATE KEY UPDATE `value` = 'true'; INSERT INTO bot_config (`key`, `value`, description) VALUES ('autopilotEnabled', 'true', 'Autopilot enabled') ON DUPLICATE KEY UPDATE `value` = 'true'; INSERT INTO bot_config (`key`, `value`, description) VALUES ('autopilotInterval', '2', 'Autopilot interval in hours') ON DUPLICATE KEY UPDATE `value` = '2'; SELECT `key`, `value` FROM bot_config WHERE `key` IN ('botEnabled', 'autopilotEnabled', 'autopilotInterval', 'killSwitch');",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3qjSsefs24zghQG.d5f38dec7f6c --database YZ9v9D6zNEEycYVBBKJ8og --execute INSERT INTO bot_config (`key`, `value`, description) VALUES ('botEnabled', 'true', 'Bot enabled') ON DUPLICATE KEY UPDATE `value` = 'true'; INSERT INTO bot_config (`key`, `value`, description) VALUES ('autopilotEnabled', 'true', 'Autopilot enabled') ON DUPLICATE KEY UPDATE `value` = 'true'; INSERT INTO bot_config (`key`, `value`, description) VALUES ('autopilotInterval', '2', 'Autopilot interval in hours') ON DUPLICATE KEY UPDATE `value` = '2'; SELECT `key`, `value` FROM bot_config WHERE `key` IN ('botEnabled', 'autopilotEnabled', 'autopilotInterval', 'killSwitch');",
+  "rows": [
+    {
+      "key": "botEnabled",
+      "value": "true"
+    },
+    {
+      "key": "autopilotEnabled",
+      "value": "true"
+    },
+    {
+      "key": "autopilotInterval",
+      "value": "2"
+    },
+    {
+      "key": "killSwitch",
+      "value": "false"
+    }
+  ],
+  "messages": [],
+  "stdout": "key\tvalue\nbotEnabled\ttrue\nautopilotEnabled\ttrue\nautopilotInterval\t2\nkillSwitch\tfalse\n",
+  "stderr": "",
+  "execution_time_ms": 99
+}

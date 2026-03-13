@@ -88,7 +88,7 @@ async function startServer() {
         const configRows = await getAllConfig();
         const configMap = new Map(configRows.map((c: any) => [c.key, c.value]));
         if (configMap.get("autopilotEnabled") === "true" && configMap.get("botEnabled") === "true") {
-          const interval = parseFloat(configMap.get("autopilotInterval") || "4");
+          const interval = parseFloat(configMap.get("autopilotInterval") || "2");
           console.log(`[Boot] Auto-starting autopilot with ${interval}h interval...`);
           await startAutopilot(interval);
         }

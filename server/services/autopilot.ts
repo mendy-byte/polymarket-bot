@@ -76,6 +76,40 @@ function shuffleArray<T>(arr: T[]): T[] {
   return shuffled;
 }
 
+// ===== Timeframe-Aware Mixing =====
+// Interleave short-dated (< 30 days) and long-dated events
+// so each cycle gets a mix of quick-resolving and longer bets.
+function mixByTimeframe<T extends { endDate?: Date | null; hoursToResolution?: number | null }>(events: T[]): T[] {
+  const SHORT_HOURS = 30 * 24; // 30 days
+  const shortDated: T[] = [];
+  const longDated: T[] = [];
+
+  for (const e of events) {
+    const hours = e.hoursToResolution || (e.endDate ? (new Date(e.endDate).getTime() - Date.now()) / (1000 * 60 * 60) : Infinity);
+    if (hours <= SHORT_HOURS) {
+      shortDated.push(e);
+    } else {
+      longDated.push(e);
+    }
+  }
+
+  // Shuffle each bucket independently
+  const shuffledShort = shuffleArray(shortDated);
+  const shuffledLong = shuffleArray(longDated);
+
+  // Interleave: 2 short, 1 long (prioritize short-dated for faster resolution)
+  const mixed: T[] = [];
+  let si = 0, li = 0;
+  while (si < shuffledShort.length || li < shuffledLong.length) {
+    if (si < shuffledShort.length) mixed.push(shuffledShort[si++]);
+    if (si < shuffledShort.length) mixed.push(shuffledShort[si++]);
+    if (li < shuffledLong.length) mixed.push(shuffledLong[li++]);
+  }
+
+  console.log(`[Autopilot] Timeframe mix: ${shuffledShort.length} short-dated (<30d), ${shuffledLong.length} long-dated`);
+  return mixed;
+}
+
 // ===== Category Diversification Check =====
 async function getCategoryUsage(): Promise<Map<string, { count: number; totalCost: number }>> {
   const openPositions = await db.getPositions("open");
@@ -365,8 +399,9 @@ async function runCycle(): Promise<AutopilotRunStats> {
       parseFloat(e.aiScore || "0") >= minAiScore
     );
 
-    // RANDOMLY SHUFFLE FIRST to avoid category/ordering bias
-    const shuffled = shuffleArray(buyable);
+    // TIMEFRAME-AWARE MIXING: interleave short-dated and long-dated events
+    // This ensures each cycle buys a mix of quick-resolving and longer bets
+    const shuffled = mixByTimeframe(buyable);
 
     // Deduplicate by event group - checks EXISTING positions + within-batch
     const existingGroupCounts = await getExistingEventGroupCounts();
@@ -540,7 +575,7 @@ async function logCycle(stats: AutopilotRunStats) {
 
 // ===== Start/Stop Controls =====
 
-export async function startAutopilot(intervalHours = 4): Promise<void> {
+export async function startAutopilot(intervalHours = 2): Promise<void> {
   if (isRunning) {
     console.log("[Autopilot] Already running");
     return;

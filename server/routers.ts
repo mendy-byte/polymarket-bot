@@ -410,7 +410,7 @@ export const appRouter = router({
       const configMap = new Map(configRows.map(c => [c.key, c.value]));
       return {
         ...status,
-        intervalHours: parseFloat(configMap.get("autopilotInterval") || "4"),
+        intervalHours: parseFloat(configMap.get("autopilotInterval") || "2"),
         maxOrdersPerCycle: parseInt(configMap.get("autopilotMaxOrders") || "50"),
         scanPages: parseInt(configMap.get("autopilotScanPages") || "30"),
         autopilotEnabled: configMap.get("autopilotEnabled") === "true",
@@ -429,7 +429,7 @@ export const appRouter = router({
         throw new Error("Cannot start autopilot: bot is not enabled. Enable it in Risk Controls first.");
       }
 
-      const interval = input?.intervalHours || parseFloat(configMap.get("autopilotInterval") || "4");
+      const interval = input?.intervalHours || parseFloat(configMap.get("autopilotInterval") || "2");
       await db.setConfig("autopilotEnabled", "true", "Autopilot enabled");
       await db.setConfig("autopilotInterval", String(interval), "Autopilot interval in hours");
       await startAutopilot(interval);

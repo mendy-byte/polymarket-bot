@@ -50,8 +50,11 @@
 - [x] Fix dashboard data pipeline: orders and positions already recording correctly (19 orders, 19 positions in DB)
 - [ ] Backfill existing 19 orders into the database
 - [x] Deduplicate within same event group: max 2 positions per event group, checks existing positions
-- [ ] Run diversified batch across sports, crypto, geopolitics, entertainment, science, politics
-- [ ] Start autopilot with live diversified trading
+- [x] Run diversified batch across sports, crypto, geopolitics, entertainment, science, politics (7 orders across 4 new categories)
+- [x] Start autopilot with live diversified trading (2h interval, auto-starts on boot)
 - [x] Research planktonXD's actual GitHub bot and exact strategy implementation
 - [x] Analyze expiration dates of current positions and target events
 - [x] Align bot logic with findings from planktonXD research
+- [x] Add short-dated event mixing: interleave 2 short (<30d) per 1 long event for faster resolution
+- [x] Shorten autopilot cycle interval to 2 hours (default changed from 4h)
+- [x] Enable autopilot and trigger first diversified cycle (26 positions across 5 categories)
