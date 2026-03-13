@@ -1,28 +1,37 @@
 /**
- * AI Event Evaluator
- * Uses LLM to assess whether cheap prediction market outcomes have realistic scenarios for hitting.
+ * AI Event Evaluator - REJECT-ONLY FILTER
+ * 
+ * Strategy change: The AI's ONLY job is to filter out impossible events.
+ * We buy EVERYTHING under 3 cents with liquidity, UNLESS the AI says it's impossible.
+ * 
+ * Score 1-2: IMPOSSIBLE - filter out (already resolved, logically impossible, team eliminated)
+ * Score 3+: BUY - the event is at least theoretically possible, so we buy it
+ * 
+ * This matches the original planktonXD strategy: massive volume, maximum diversification.
+ * The math works through uncorrelated bets, not intelligence.
  */
 
 import { invokeLLM } from "../_core/llm";
 import type { ParsedCheapOutcome } from "./gammaApi";
 
 export interface AiEvalResult {
-  score: number; // 1-10 scale
+  score: number; // 1-10 scale (but we only care about 1-2 vs 3+)
   reasoning: string;
-  scenarios: string[];
-  recommendation: "buy" | "skip" | "watch";
+  isImpossible: boolean; // true = filter out, false = buy
+  recommendation: "buy" | "skip";
 }
 
 /**
  * Evaluate a batch of cheap outcomes using AI.
- * Batches up to 10 events per LLM call for efficiency.
+ * The AI is ONLY asked: "Is this event literally impossible?"
+ * Batches up to 15 events per LLM call for efficiency.
  */
 export async function evaluateBatch(outcomes: ParsedCheapOutcome[]): Promise<Map<string, AiEvalResult>> {
   const results = new Map<string, AiEvalResult>();
 
-  // Process in batches of 8
-  for (let i = 0; i < outcomes.length; i += 8) {
-    const batch = outcomes.slice(i, i + 8);
+  // Process in batches of 15 (larger batches since we need less analysis per event)
+  for (let i = 0; i < outcomes.length; i += 15) {
+    const batch = outcomes.slice(i, i + 15);
     try {
       const batchResults = await evaluateBatchInternal(batch);
       batchResults.forEach((val, key) => {
@@ -30,13 +39,13 @@ export async function evaluateBatch(outcomes: ParsedCheapOutcome[]): Promise<Map
       });
     } catch (err) {
       console.error(`[AI Evaluator] Batch error:`, err);
-      // Assign neutral scores on failure
+      // On failure, DEFAULT TO BUY (score 5) - we want to buy everything possible
       for (const o of batch) {
         results.set(o.marketId + "_" + o.outcomeIndex, {
           score: 5,
-          reasoning: "AI evaluation failed, assigned neutral score",
-          scenarios: [],
-          recommendation: "watch",
+          reasoning: "AI evaluation failed - defaulting to buy (reject-only filter)",
+          isImpossible: false,
+          recommendation: "buy",
         });
       }
     }
@@ -49,34 +58,41 @@ export async function evaluateBatch(outcomes: ParsedCheapOutcome[]): Promise<Map
 
 async function evaluateBatchInternal(outcomes: ParsedCheapOutcome[]): Promise<Map<string, AiEvalResult>> {
   const eventsDescription = outcomes.map((o, idx) => {
-    return `[${idx + 1}] "${o.question}" - Outcome: "${o.outcome}" at $${o.price.toFixed(4)} | Category: ${o.category} | Resolves: ${new Date(o.endDate).toLocaleDateString()} (${o.hoursToResolution}h) | Liquidity: $${o.liquidity.toFixed(0)}`;
+    return `[${idx + 1}] "${o.question}" - Outcome: "${o.outcome}" at $${o.price.toFixed(4)} | Category: ${o.category} | Resolves: ${new Date(o.endDate).toLocaleDateString()} (${o.hoursToResolution}h)`;
   }).join("\n");
 
   const response = await invokeLLM({
     messages: [
       {
         role: "system",
-        content: `You are a prediction market analyst specializing in tail-risk events. Your job is to evaluate whether extremely cheap prediction market outcomes (priced at 1-3 cents, implying 1-3% probability) have ANY realistic scenario where they could actually resolve YES.
+        content: `You are a prediction market filter. Your ONLY job is to identify events that are LITERALLY IMPOSSIBLE.
 
-You are looking for MISPRICED events - outcomes the market says are nearly impossible but actually have a non-trivial chance. Think about:
-- Black swan events that markets underestimate
-- Events where new information could shift probabilities dramatically
-- Outcomes where the market is anchored to current conditions but things could change
-- Sports upsets, political surprises, regulatory changes, tech breakthroughs
-- Events where the time horizon allows for unexpected developments
+You are NOT scoring how likely events are. Everything priced under 3 cents is already extremely unlikely - that's the whole point. We WANT to buy unlikely events.
 
-Score each event 1-10:
-- 1-2: Truly impossible or already resolved (e.g., "Will the sun explode tomorrow")
-- 3-4: Extremely unlikely, no realistic path (e.g., team eliminated from playoffs)
-- 5-6: Very unlikely but conceivable with major surprises
-- 7-8: Underpriced - there are realistic scenarios the market is underweighting
-- 9-10: Significantly mispriced - clear catalysts or scenarios exist
+Mark an event as "impossible" ONLY if:
+- The event has ALREADY been decided/resolved (e.g., a game that already happened)
+- It is LOGICALLY impossible (e.g., "Will the sun explode tomorrow")
+- The entity doesn't exist or the question is nonsensical
+- A team/person has been mathematically eliminated from the competition
+- The time window makes it physically impossible
 
-Be BRUTALLY honest. Most cheap events ARE correctly priced. But some are genuine opportunities.`,
+Do NOT mark as impossible just because it's very unlikely. We WANT very unlikely events. That's the strategy.
+
+Score guide:
+- 1-2: IMPOSSIBLE - literally cannot happen, filter out
+- 3-10: POSSIBLE - could theoretically happen no matter how unlikely, BUY IT
+
+Be VERY conservative about marking things impossible. When in doubt, score 3+ (buy).
+Examples of things that ARE possible and should score 3+:
+- Longshot political candidates winning
+- Massive sports upsets
+- Unlikely crypto price targets
+- Rare weather events
+- Low-probability scientific discoveries`,
       },
       {
         role: "user",
-        content: `Evaluate these cheap prediction market outcomes. For each, provide a score (1-10), brief reasoning, and 1-2 realistic scenarios if any exist.
+        content: `For each event below, determine ONLY whether it is literally impossible. Score 1-2 if impossible, 3+ if theoretically possible (even if extremely unlikely).
 
 ${eventsDescription}
 
@@ -85,10 +101,9 @@ Respond in JSON format:
   "evaluations": [
     {
       "index": 1,
-      "score": 7,
-      "reasoning": "Brief explanation",
-      "scenarios": ["Scenario 1", "Scenario 2"],
-      "recommendation": "buy"
+      "score": 3,
+      "reasoning": "Brief 1-sentence reason",
+      "is_impossible": false
     }
   ]
 }`,
@@ -97,7 +112,7 @@ Respond in JSON format:
     response_format: {
       type: "json_schema",
       json_schema: {
-        name: "event_evaluations",
+        name: "event_filter",
         strict: true,
         schema: {
           type: "object",
@@ -110,10 +125,9 @@ Respond in JSON format:
                   index: { type: "integer" },
                   score: { type: "integer" },
                   reasoning: { type: "string" },
-                  scenarios: { type: "array", items: { type: "string" } },
-                  recommendation: { type: "string", enum: ["buy", "skip", "watch"] },
+                  is_impossible: { type: "boolean" },
                 },
-                required: ["index", "score", "reasoning", "scenarios", "recommendation"],
+                required: ["index", "score", "reasoning", "is_impossible"],
                 additionalProperties: false,
               },
             },
@@ -135,8 +149,7 @@ Respond in JSON format:
       index: number;
       score: number;
       reasoning: string;
-      scenarios: string[];
-      recommendation: "buy" | "skip" | "watch";
+      is_impossible: boolean;
     }>;
   };
 
@@ -145,11 +158,13 @@ Respond in JSON format:
     const idx = evaluation.index - 1;
     if (idx >= 0 && idx < outcomes.length) {
       const outcome = outcomes[idx];
+      const score = Math.min(10, Math.max(1, evaluation.score));
+      const isImpossible = evaluation.is_impossible || score <= 2;
       results.set(outcome.marketId + "_" + outcome.outcomeIndex, {
-        score: Math.min(10, Math.max(1, evaluation.score)),
+        score,
         reasoning: evaluation.reasoning,
-        scenarios: evaluation.scenarios,
-        recommendation: evaluation.recommendation,
+        isImpossible,
+        recommendation: isImpossible ? "skip" : "buy",
       });
     }
   }
@@ -165,8 +180,8 @@ export async function evaluateSingle(outcome: ParsedCheapOutcome): Promise<AiEva
   const key = outcome.marketId + "_" + outcome.outcomeIndex;
   return results.get(key) || {
     score: 5,
-    reasoning: "Evaluation unavailable",
-    scenarios: [],
-    recommendation: "watch",
+    reasoning: "Evaluation unavailable - defaulting to buy",
+    isImpossible: false,
+    recommendation: "buy",
   };
 }

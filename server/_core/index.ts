@@ -60,6 +60,43 @@ async function startServer() {
   server.listen(port, () => {
     console.log(`Server running on http://localhost:${port}/`);
   });
+
+  // Auto-initialize CLOB client and proxy after server starts
+  // This runs in the background so it doesn't block server startup
+  setTimeout(async () => {
+    try {
+      const { initializeClobClient, getClobStatus } = await import("../services/clobTrader");
+      const { startAutopilot } = await import("../services/autopilot");
+      const { getDb } = await import("../db");
+      
+      // Check if wallet is configured
+      const pk = process.env.POLYGON_PRIVATE_KEY;
+      if (pk) {
+        console.log("[Boot] Wallet detected, initializing CLOB client...");
+        const result = await initializeClobClient();
+        if (result.success) {
+          console.log("[Boot] CLOB client initialized successfully");
+        } else {
+          console.warn("[Boot] CLOB init failed:", result.error);
+        }
+      }
+
+      // Check if autopilot should auto-start
+      const db = await getDb();
+      if (db) {
+        const { getAllConfig } = await import("../db");
+        const configRows = await getAllConfig();
+        const configMap = new Map(configRows.map((c: any) => [c.key, c.value]));
+        if (configMap.get("autopilotEnabled") === "true" && configMap.get("botEnabled") === "true") {
+          const interval = parseFloat(configMap.get("autopilotInterval") || "4");
+          console.log(`[Boot] Auto-starting autopilot with ${interval}h interval...`);
+          await startAutopilot(interval);
+        }
+      }
+    } catch (err: any) {
+      console.warn("[Boot] Auto-init error (non-fatal):", err.message);
+    }
+  }, 3000);
 }
 
 startServer().catch(console.error);

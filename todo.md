@@ -19,9 +19,9 @@
 - [x] Dashboard: Settings page (wallet config, bot parameters)
 - [x] Dashboard: Expected Value calculator
 - [x] Dashboard: Activity Log page
-- [x] Vitest tests for core backend logic (57 passing)
+- [x] Vitest tests for core backend logic (59 passing)
 - [x] Autonomous scan-evaluate-buy loop (background job every 4-6 hours)
-- [x] Smart bet sizing ($5-$25 based on AI confidence score)
+- [x] Flat $5 bet sizing (planktonXD strategy - no smart sizing)
 - [x] Bulk order pipeline (batch 50-100+ orders per run)
 - [x] Auto-resolution tracker (check resolved markets, update P&L)
 - [x] Autopilot controls on dashboard (enable/disable, interval, status)
@@ -35,3 +35,23 @@
 - [x] Batch order support (up to 15 per batch)
 - [x] Cancel all orders / disconnect CLOB controls
 - [x] Updated Settings page with connection status and quick actions
+- [x] Connect wallet and initialize CLOB client live
+- [x] Run first scan cycle with real market data
+- [x] Create DigitalOcean droplet in Amsterdam for SOCKS5 proxy
+- [x] Set up SOCKS5 proxy on droplet
+- [x] Wire proxy into CLOB trading client
+- [x] Test live order through proxy
+- [x] First batch of 19 live orders placed on Polymarket
+- [x] Fix tick size normalization (CLOB ROUNDING_CONFIG mismatch)
+- [x] USDC.e approval for Polymarket exchange contracts
+- [x] Rebuild buy logic: buy broadly across ALL categories, not just highest-scored
+- [x] Change AI role: reject-only filter (score 1-2 = impossible, skip; score 3+ = buy)
+- [x] Enforce hard category diversification: max 15% per category, spread across 6+ categories
+- [x] Fix dashboard data pipeline: orders and positions already recording correctly (19 orders, 19 positions in DB)
+- [ ] Backfill existing 19 orders into the database
+- [x] Deduplicate within same event group: max 2 positions per event group, checks existing positions
+- [ ] Run diversified batch across sports, crypto, geopolitics, entertainment, science, politics
+- [ ] Start autopilot with live diversified trading
+- [x] Research planktonXD's actual GitHub bot and exact strategy implementation
+- [x] Analyze expiration dates of current positions and target events
+- [x] Align bot logic with findings from planktonXD research

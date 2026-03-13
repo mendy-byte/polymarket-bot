@@ -297,13 +297,13 @@ function OverviewContent() {
                         {cat.category}
                       </span>
                       <span className="text-xs font-mono text-muted-foreground">
-                        {cat.percentage.toFixed(1)}% / 30% max
+                        {cat.percentage.toFixed(1)}% / 15% max
                       </span>
                     </div>
                     <div className="h-2 bg-muted rounded-full overflow-hidden">
                       <div
                         className={`h-full rounded-full transition-all ${
-                          cat.percentage > 30 ? "bg-loss" : "bg-primary"
+                          cat.percentage > 15 ? "bg-loss" : cat.percentage > 10 ? "bg-warning" : "bg-primary"
                         }`}
                         style={{ width: `${Math.min(cat.percentage, 100)}%` }}
                       />

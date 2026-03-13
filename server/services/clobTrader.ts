@@ -14,6 +14,7 @@ import { ClobClient, Side, OrderType, SignatureType } from "@polymarket/clob-cli
 import type { TickSize as ClobTickSize, CreateOrderOptions } from "@polymarket/clob-client";
 import { Wallet } from "ethers";
 import * as db from "../db";
+import { initializeProxy, getProxyStatus } from "./proxySetup";
 
 const CLOB_HOST = "https://clob.polymarket.com";
 const CHAIN_ID = 137; // Polygon mainnet
@@ -44,6 +45,13 @@ export interface OrderResult {
  */
 export async function initializeClobClient(): Promise<{ success: boolean; error?: string }> {
   try {
+    // Initialize SOCKS5 proxy for CLOB requests (routes through Amsterdam)
+    const proxyStatus = getProxyStatus();
+    if (!proxyStatus.active) {
+      console.log("[CLOB] Initializing SOCKS5 proxy for CLOB API access...");
+      initializeProxy();
+    }
+
     const configRows = await db.getAllConfig();
     const configMap = new Map(configRows.map(c => [c.key, c.value]));
 
@@ -73,14 +81,19 @@ export async function initializeClobClient(): Promise<{ success: boolean; error?
     let passphrase = configMap.get("clobPassphrase");
 
     if (!apiKey || !apiSecret || !passphrase) {
-      // Derive credentials from wallet
+      // Derive credentials from wallet using deriveApiKey (deterministic, works for new wallets)
       console.log("[CLOB] Deriving API credentials from wallet...");
-      const tempClient = new ClobClient(CLOB_HOST, CHAIN_ID, signer);
-      const creds = await tempClient.createOrDeriveApiKey();
+      const tempClient = new ClobClient(CLOB_HOST, CHAIN_ID, signer, undefined, SignatureType.EOA);
+      const creds = await tempClient.deriveApiKey();
 
-      apiKey = creds.key;
+      // deriveApiKey returns { key, secret, passphrase }
+      apiKey = creds.key || (creds as any).apiKey;
       apiSecret = creds.secret;
       passphrase = creds.passphrase;
+
+      if (!apiKey) {
+        throw new Error("Failed to derive API key - got empty key from deriveApiKey()");
+      }
 
       // Cache in database
       await db.setConfig("clobApiKey", apiKey, "CLOB API key (derived)");
@@ -156,9 +169,9 @@ function startHeartbeat() {
     try {
       const resp = await clobClient.postHeartbeat(heartbeatId);
       heartbeatId = resp.heartbeat_id || "";
-    } catch (err: any) {
-      // Heartbeat failures are non-fatal but should be logged
-      console.warn("[CLOB] Heartbeat failed:", err.message);
+    } catch (_err: any) {
+      // Heartbeat failures are non-fatal - silently ignore
+      // The CLOB client dumps massive circular JSON on heartbeat errors
     }
   }, 5000);
 }
@@ -175,6 +188,33 @@ export function stopHeartbeat() {
 }
 
 /**
+ * Normalize tick size to match CLOB client's ROUNDING_CONFIG keys.
+ * The CLOB client only accepts: "0.1", "0.01", "0.001", "0.0001"
+ * But the Gamma API returns values like "0.0010" which don't match.
+ */
+function normalizeTickSize(tickSize: string): ClobTickSize {
+  const val = parseFloat(tickSize);
+  if (val >= 0.1) return "0.1";
+  if (val >= 0.01) return "0.01";
+  if (val >= 0.001) return "0.001";
+  return "0.0001";
+}
+
+/**
+ * Round a price to the nearest valid tick.
+ */
+function roundToTick(price: number, tickSize: string): number {
+  const tick = parseFloat(tickSize);
+  // Price must be >= tickSize and <= 1 - tickSize
+  const minPrice = tick;
+  const maxPrice = 1 - tick;
+  // Round to tick precision
+  const rounded = Math.round(price / tick) * tick;
+  // Clamp to valid range
+  return Math.max(minPrice, Math.min(maxPrice, parseFloat(rounded.toFixed(4))));
+}
+
+/**
  * Place a single GTC limit buy order on the CLOB.
  */
 export async function placeLimitOrder(
@@ -187,15 +227,31 @@ export async function placeLimitOrder(
   try {
     const client = await getClient();
 
+    // Validate and round price to valid tick
+    const validPrice = roundToTick(price, tickSize);
+    const tick = parseFloat(tickSize);
+    
+    // Recalculate size based on adjusted price to stay within budget
+    const budget = price * size; // original budget
+    const adjustedSize = Math.floor(budget / validPrice);
+    
+    if (adjustedSize < 1) {
+      return { success: false, errorMsg: `Adjusted size < 1 after price rounding (price: ${validPrice}, tick: ${tickSize})` };
+    }
+
+    // Normalize tick size to match CLOB client's expected format
+    const normalizedTick = normalizeTickSize(tickSize);
+    console.log(`[CLOB] Placing order: token=${tokenId.slice(0,10)}... price=${validPrice} size=${adjustedSize} tick=${normalizedTick} negRisk=${negRisk}`);
+
     const response = await client.createAndPostOrder(
       {
         tokenID: tokenId,
-        price,
-        size,
+        price: validPrice,
+        size: adjustedSize,
         side: Side.BUY,
       },
       {
-        tickSize,
+        tickSize: normalizedTick,
         negRisk,
       } as Partial<CreateOrderOptions>,
       OrderType.GTC,
@@ -255,6 +311,7 @@ export async function placeBatchOrders(
       // Build order objects
       const orderPromises = batch.map(async (o) => {
         try {
+          const normalizedTick = normalizeTickSize(o.tickSize);
           const order = await client.createOrder(
             {
               tokenID: o.tokenId,
@@ -263,7 +320,7 @@ export async function placeBatchOrders(
               side: Side.BUY,
             },
             {
-              tickSize: o.tickSize,
+              tickSize: normalizedTick,
               negRisk: o.negRisk,
             } as Partial<CreateOrderOptions>,
           );

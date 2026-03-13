@@ -15,14 +15,14 @@ export interface RiskConfig {
 
 export const DEFAULT_RISK_CONFIG: RiskConfig = {
   maxTotalCapital: 2000,
-  maxPerEvent: 25,
-  maxCategoryPercent: 30,
+  maxPerEvent: 5,           // Flat $5 per event (planktonXD strategy)
+  maxCategoryPercent: 15,   // Hard cap: max 15% in any single category
   dailyBuyBudget: 200,
   minPrice: 0.001,
   maxPrice: 0.03,
   minLiquidity: 1000,
   minHoursToResolution: 24,
-  minAiScore: 3,
+  minAiScore: 3,            // Reject-only: 1-2 = impossible, 3+ = buy
   killSwitch: false,
   botEnabled: false,
 };

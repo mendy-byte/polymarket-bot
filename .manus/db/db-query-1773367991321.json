@@ -1,0 +1,80 @@
+{
+  "query": "SELECT COLUMN_NAME, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH FROM information_schema.COLUMNS WHERE TABLE_NAME = 'orders' AND TABLE_SCHEMA = DATABASE();",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3qjSsefs24zghQG.d5f38dec7f6c --database YZ9v9D6zNEEycYVBBKJ8og --execute SELECT COLUMN_NAME, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH FROM information_schema.COLUMNS WHERE TABLE_NAME = 'orders' AND TABLE_SCHEMA = DATABASE();",
+  "rows": [
+    {
+      "COLUMN_NAME": "id",
+      "DATA_TYPE": "int",
+      "CHARACTER_MAXIMUM_LENGTH": "NULL"
+    },
+    {
+      "COLUMN_NAME": "scannedEventId",
+      "DATA_TYPE": "int",
+      "CHARACTER_MAXIMUM_LENGTH": "NULL"
+    },
+    {
+      "COLUMN_NAME": "orderId",
+      "DATA_TYPE": "varchar",
+      "CHARACTER_MAXIMUM_LENGTH": "256"
+    },
+    {
+      "COLUMN_NAME": "marketId",
+      "DATA_TYPE": "varchar",
+      "CHARACTER_MAXIMUM_LENGTH": "128"
+    },
+    {
+      "COLUMN_NAME": "tokenId",
+      "DATA_TYPE": "varchar",
+      "CHARACTER_MAXIMUM_LENGTH": "256"
+    },
+    {
+      "COLUMN_NAME": "side",
+      "DATA_TYPE": "varchar",
+      "CHARACTER_MAXIMUM_LENGTH": "8"
+    },
+    {
+      "COLUMN_NAME": "price",
+      "DATA_TYPE": "decimal",
+      "CHARACTER_MAXIMUM_LENGTH": "NULL"
+    },
+    {
+      "COLUMN_NAME": "size",
+      "DATA_TYPE": "decimal",
+      "CHARACTER_MAXIMUM_LENGTH": "NULL"
+    },
+    {
+      "COLUMN_NAME": "amountUsd",
+      "DATA_TYPE": "decimal",
+      "CHARACTER_MAXIMUM_LENGTH": "NULL"
+    },
+    {
+      "COLUMN_NAME": "status",
+      "DATA_TYPE": "enum",
+      "CHARACTER_MAXIMUM_LENGTH": "9"
+    },
+    {
+      "COLUMN_NAME": "errorMessage",
+      "DATA_TYPE": "text",
+      "CHARACTER_MAXIMUM_LENGTH": "65535"
+    },
+    {
+      "COLUMN_NAME": "filledAt",
+      "DATA_TYPE": "timestamp",
+      "CHARACTER_MAXIMUM_LENGTH": "NULL"
+    },
+    {
+      "COLUMN_NAME": "createdAt",
+      "DATA_TYPE": "timestamp",
+      "CHARACTER_MAXIMUM_LENGTH": "NULL"
+    },
+    {
+      "COLUMN_NAME": "updatedAt",
+      "DATA_TYPE": "timestamp",
+      "CHARACTER_MAXIMUM_LENGTH": "NULL"
+    }
+  ],
+  "messages": [],
+  "stdout": "COLUMN_NAME\tDATA_TYPE\tCHARACTER_MAXIMUM_LENGTH\nid\tint\tNULL\nscannedEventId\tint\tNULL\norderId\tvarchar\t256\nmarketId\tvarchar\t128\ntokenId\tvarchar\t256\nside\tvarchar\t8\nprice\tdecimal\tNULL\nsize\tdecimal\tNULL\namountUsd\tdecimal\tNULL\nstatus\tenum\t9\nerrorMessage\ttext\t65535\nfilledAt\ttimestamp\tNULL\ncreatedAt\ttimestamp\tNULL\nupdatedAt\ttimestamp\tNULL\n",
+  "stderr": "",
+  "execution_time_ms": 71
+}

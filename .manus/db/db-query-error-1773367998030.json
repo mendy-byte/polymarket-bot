@@ -1,0 +1,8 @@
+{
+  "query": "INSERT INTO orders (scannedEventId, marketId, tokenId, side, price, size, amountUsd, status, clobOrderId, createdAt, updatedAt) VALUES (3, '654414', '114350083305515876605975857295292847572608542141507135338338719165921048222327', 'BUY', '0.006', '1666', '9.996', 'placed', '0x22511417ecabd0d3391e6cf14c23839b3319891ffacc82b49724a9e8f1892506', NOW(), NOW());",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3qjSsefs24zghQG.d5f38dec7f6c --database YZ9v9D6zNEEycYVBBKJ8og --execute INSERT INTO orders (scannedEventId, marketId, tokenId, side, price, size, amountUsd, status, clobOrderId, createdAt, updatedAt) VALUES (3, '654414', '114350083305515876605975857295292847572608542141507135338338719165921048222327', 'BUY', '0.006', '1666', '9.996', 'placed', '0x22511417ecabd0d3391e6cf14c23839b3319891ffacc82b49724a9e8f1892506', NOW(), NOW());",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1054 (42S22) at line 1: Unknown column 'clobOrderId' in 'field list'"
+  ]
+}

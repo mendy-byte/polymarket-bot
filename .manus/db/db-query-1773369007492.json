@@ -1,0 +1,223 @@
+{
+  "query": "SHOW TABLES; DESCRIBE orders; DESCRIBE positions; DESCRIBE scanned_events;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3qjSsefs24zghQG.d5f38dec7f6c --database YZ9v9D6zNEEycYVBBKJ8og --execute SHOW TABLES; DESCRIBE orders; DESCRIBE positions; DESCRIBE scanned_events;",
+  "rows": [
+    {
+      "Tables_in_YZ9v9D6zNEEycYVBBKJ8og": "__drizzle_migrations"
+    },
+    {
+      "Tables_in_YZ9v9D6zNEEycYVBBKJ8og": "bot_config"
+    },
+    {
+      "Tables_in_YZ9v9D6zNEEycYVBBKJ8og": "orders"
+    },
+    {
+      "Tables_in_YZ9v9D6zNEEycYVBBKJ8og": "positions"
+    },
+    {
+      "Tables_in_YZ9v9D6zNEEycYVBBKJ8og": "scan_logs"
+    },
+    {
+      "Tables_in_YZ9v9D6zNEEycYVBBKJ8og": "scanned_events"
+    },
+    {
+      "Tables_in_YZ9v9D6zNEEycYVBBKJ8og": "users"
+    },
+    {
+      "Tables_in_YZ9v9D6zNEEycYVBBKJ8og": "Field\tType\tNull\tKey\tDefault\tExtra"
+    },
+    {
+      "Tables_in_YZ9v9D6zNEEycYVBBKJ8og": "id\tint\tNO\tPRI\tNULL\tauto_increment"
+    },
+    {
+      "Tables_in_YZ9v9D6zNEEycYVBBKJ8og": "scannedEventId\tint\tNO\t\tNULL\t"
+    },
+    {
+      "Tables_in_YZ9v9D6zNEEycYVBBKJ8og": "orderId\tvarchar(256)\tYES\t\tNULL\t"
+    },
+    {
+      "Tables_in_YZ9v9D6zNEEycYVBBKJ8og": "marketId\tvarchar(128)\tNO\t\tNULL\t"
+    },
+    {
+      "Tables_in_YZ9v9D6zNEEycYVBBKJ8og": "tokenId\tvarchar(256)\tNO\t\tNULL\t"
+    },
+    {
+      "Tables_in_YZ9v9D6zNEEycYVBBKJ8og": "side\tvarchar(8)\tNO\t\tNULL\t"
+    },
+    {
+      "Tables_in_YZ9v9D6zNEEycYVBBKJ8og": "price\tdecimal(10,6)\tNO\t\tNULL\t"
+    },
+    {
+      "Tables_in_YZ9v9D6zNEEycYVBBKJ8og": "size\tdecimal(18,6)\tNO\t\tNULL\t"
+    },
+    {
+      "Tables_in_YZ9v9D6zNEEycYVBBKJ8og": "amountUsd\tdecimal(18,6)\tNO\t\tNULL\t"
+    },
+    {
+      "Tables_in_YZ9v9D6zNEEycYVBBKJ8og": "status\tenum('pending','placed','filled','partial','cancelled','failed')\tNO\t\tpending\t"
+    },
+    {
+      "Tables_in_YZ9v9D6zNEEycYVBBKJ8og": "errorMessage\ttext\tYES\t\tNULL\t"
+    },
+    {
+      "Tables_in_YZ9v9D6zNEEycYVBBKJ8og": "filledAt\ttimestamp\tYES\t\tNULL\t"
+    },
+    {
+      "Tables_in_YZ9v9D6zNEEycYVBBKJ8og": "createdAt\ttimestamp\tNO\t\tCURRENT_TIMESTAMP\t"
+    },
+    {
+      "Tables_in_YZ9v9D6zNEEycYVBBKJ8og": "updatedAt\ttimestamp\tNO\t\tCURRENT_TIMESTAMP\tDEFAULT_GENERATED on update CURRENT_TIMESTAMP"
+    },
+    {
+      "Tables_in_YZ9v9D6zNEEycYVBBKJ8og": "Field\tType\tNull\tKey\tDefault\tExtra"
+    },
+    {
+      "Tables_in_YZ9v9D6zNEEycYVBBKJ8og": "id\tint\tNO\tPRI\tNULL\tauto_increment"
+    },
+    {
+      "Tables_in_YZ9v9D6zNEEycYVBBKJ8og": "scannedEventId\tint\tNO\t\tNULL\t"
+    },
+    {
+      "Tables_in_YZ9v9D6zNEEycYVBBKJ8og": "marketId\tvarchar(128)\tNO\t\tNULL\t"
+    },
+    {
+      "Tables_in_YZ9v9D6zNEEycYVBBKJ8og": "tokenId\tvarchar(256)\tNO\t\tNULL\t"
+    },
+    {
+      "Tables_in_YZ9v9D6zNEEycYVBBKJ8og": "question\ttext\tNO\t\tNULL\t"
+    },
+    {
+      "Tables_in_YZ9v9D6zNEEycYVBBKJ8og": "outcome\tvarchar(64)\tNO\t\tNULL\t"
+    },
+    {
+      "Tables_in_YZ9v9D6zNEEycYVBBKJ8og": "category\tvarchar(128)\tYES\t\tNULL\t"
+    },
+    {
+      "Tables_in_YZ9v9D6zNEEycYVBBKJ8og": "entryPrice\tdecimal(10,6)\tNO\t\tNULL\t"
+    },
+    {
+      "Tables_in_YZ9v9D6zNEEycYVBBKJ8og": "shares\tdecimal(18,6)\tNO\t\tNULL\t"
+    },
+    {
+      "Tables_in_YZ9v9D6zNEEycYVBBKJ8og": "costBasis\tdecimal(18,6)\tNO\t\tNULL\t"
+    },
+    {
+      "Tables_in_YZ9v9D6zNEEycYVBBKJ8og": "currentPrice\tdecimal(10,6)\tYES\t\tNULL\t"
+    },
+    {
+      "Tables_in_YZ9v9D6zNEEycYVBBKJ8og": "currentValue\tdecimal(18,6)\tYES\t\tNULL\t"
+    },
+    {
+      "Tables_in_YZ9v9D6zNEEycYVBBKJ8og": "pnl\tdecimal(18,6)\tYES\t\tNULL\t"
+    },
+    {
+      "Tables_in_YZ9v9D6zNEEycYVBBKJ8og": "pnlPercent\tdecimal(10,2)\tYES\t\tNULL\t"
+    },
+    {
+      "Tables_in_YZ9v9D6zNEEycYVBBKJ8og": "status\tenum('open','resolved_win','resolved_loss','sold')\tNO\t\topen\t"
+    },
+    {
+      "Tables_in_YZ9v9D6zNEEycYVBBKJ8og": "resolvedAt\ttimestamp\tYES\t\tNULL\t"
+    },
+    {
+      "Tables_in_YZ9v9D6zNEEycYVBBKJ8og": "resolutionPayout\tdecimal(18,6)\tYES\t\tNULL\t"
+    },
+    {
+      "Tables_in_YZ9v9D6zNEEycYVBBKJ8og": "endDate\ttimestamp\tYES\t\tNULL\t"
+    },
+    {
+      "Tables_in_YZ9v9D6zNEEycYVBBKJ8og": "createdAt\ttimestamp\tNO\t\tCURRENT_TIMESTAMP\t"
+    },
+    {
+      "Tables_in_YZ9v9D6zNEEycYVBBKJ8og": "updatedAt\ttimestamp\tNO\t\tCURRENT_TIMESTAMP\tDEFAULT_GENERATED on update CURRENT_TIMESTAMP"
+    },
+    {
+      "Tables_in_YZ9v9D6zNEEycYVBBKJ8og": "Field\tType\tNull\tKey\tDefault\tExtra"
+    },
+    {
+      "Tables_in_YZ9v9D6zNEEycYVBBKJ8og": "id\tint\tNO\tPRI\tNULL\tauto_increment"
+    },
+    {
+      "Tables_in_YZ9v9D6zNEEycYVBBKJ8og": "marketId\tvarchar(128)\tNO\t\tNULL\t"
+    },
+    {
+      "Tables_in_YZ9v9D6zNEEycYVBBKJ8og": "conditionId\tvarchar(128)\tYES\t\tNULL\t"
+    },
+    {
+      "Tables_in_YZ9v9D6zNEEycYVBBKJ8og": "tokenId\tvarchar(256)\tYES\t\tNULL\t"
+    },
+    {
+      "Tables_in_YZ9v9D6zNEEycYVBBKJ8og": "question\ttext\tNO\t\tNULL\t"
+    },
+    {
+      "Tables_in_YZ9v9D6zNEEycYVBBKJ8og": "outcome\tvarchar(64)\tNO\t\tNULL\t"
+    },
+    {
+      "Tables_in_YZ9v9D6zNEEycYVBBKJ8og": "slug\tvarchar(512)\tYES\t\tNULL\t"
+    },
+    {
+      "Tables_in_YZ9v9D6zNEEycYVBBKJ8og": "eventSlug\tvarchar(512)\tYES\t\tNULL\t"
+    },
+    {
+      "Tables_in_YZ9v9D6zNEEycYVBBKJ8og": "category\tvarchar(128)\tYES\t\tNULL\t"
+    },
+    {
+      "Tables_in_YZ9v9D6zNEEycYVBBKJ8og": "tags\tjson\tYES\t\tNULL\t"
+    },
+    {
+      "Tables_in_YZ9v9D6zNEEycYVBBKJ8og": "price\tdecimal(10,6)\tNO\t\tNULL\t"
+    },
+    {
+      "Tables_in_YZ9v9D6zNEEycYVBBKJ8og": "liquidity\tdecimal(18,2)\tYES\t\tNULL\t"
+    },
+    {
+      "Tables_in_YZ9v9D6zNEEycYVBBKJ8og": "volume\tdecimal(18,2)\tYES\t\tNULL\t"
+    },
+    {
+      "Tables_in_YZ9v9D6zNEEycYVBBKJ8og": "bestBid\tdecimal(10,6)\tYES\t\tNULL\t"
+    },
+    {
+      "Tables_in_YZ9v9D6zNEEycYVBBKJ8og": "bestAsk\tdecimal(10,6)\tYES\t\tNULL\t"
+    },
+    {
+      "Tables_in_YZ9v9D6zNEEycYVBBKJ8og": "spread\tdecimal(10,6)\tYES\t\tNULL\t"
+    },
+    {
+      "Tables_in_YZ9v9D6zNEEycYVBBKJ8og": "endDate\ttimestamp\tYES\t\tNULL\t"
+    },
+    {
+      "Tables_in_YZ9v9D6zNEEycYVBBKJ8og": "hoursToResolution\tint\tYES\t\tNULL\t"
+    },
+    {
+      "Tables_in_YZ9v9D6zNEEycYVBBKJ8og": "aiScore\tdecimal(5,2)\tYES\t\tNULL\t"
+    },
+    {
+      "Tables_in_YZ9v9D6zNEEycYVBBKJ8og": "aiReasoning\ttext\tYES\t\tNULL\t"
+    },
+    {
+      "Tables_in_YZ9v9D6zNEEycYVBBKJ8og": "aiEvaluatedAt\ttimestamp\tYES\t\tNULL\t"
+    },
+    {
+      "Tables_in_YZ9v9D6zNEEycYVBBKJ8og": "status\tenum('discovered','evaluated','approved','rejected','ordered','filled','resolved_win','resolved_loss','expired')\tNO\t\tdiscovered\t"
+    },
+    {
+      "Tables_in_YZ9v9D6zNEEycYVBBKJ8og": "tickSize\tdecimal(10,4)\tYES\t\tNULL\t"
+    },
+    {
+      "Tables_in_YZ9v9D6zNEEycYVBBKJ8og": "minOrderSize\tint\tYES\t\tNULL\t"
+    },
+    {
+      "Tables_in_YZ9v9D6zNEEycYVBBKJ8og": "negRisk\ttinyint(1)\tYES\t\t0\t"
+    },
+    {
+      "Tables_in_YZ9v9D6zNEEycYVBBKJ8og": "createdAt\ttimestamp\tNO\t\tCURRENT_TIMESTAMP\t"
+    },
+    {
+      "Tables_in_YZ9v9D6zNEEycYVBBKJ8og": "updatedAt\ttimestamp\tNO\t\tCURRENT_TIMESTAMP\tDEFAULT_GENERATED on update CURRENT_TIMESTAMP"
+    }
+  ],
+  "messages": [],
+  "stdout": "Tables_in_YZ9v9D6zNEEycYVBBKJ8og\n__drizzle_migrations\nbot_config\norders\npositions\nscan_logs\nscanned_events\nusers\nField\tType\tNull\tKey\tDefault\tExtra\nid\tint\tNO\tPRI\tNULL\tauto_increment\nscannedEventId\tint\tNO\t\tNULL\t\norderId\tvarchar(256)\tYES\t\tNULL\t\nmarketId\tvarchar(128)\tNO\t\tNULL\t\ntokenId\tvarchar(256)\tNO\t\tNULL\t\nside\tvarchar(8)\tNO\t\tNULL\t\nprice\tdecimal(10,6)\tNO\t\tNULL\t\nsize\tdecimal(18,6)\tNO\t\tNULL\t\namountUsd\tdecimal(18,6)\tNO\t\tNULL\t\nstatus\tenum('pending','placed','filled','partial','cancelled','failed')\tNO\t\tpending\t\nerrorMessage\ttext\tYES\t\tNULL\t\nfilledAt\ttimestamp\tYES\t\tNULL\t\ncreatedAt\ttimestamp\tNO\t\tCURRENT_TIMESTAMP\t\nupdatedAt\ttimestamp\tNO\t\tCURRENT_TIMESTAMP\tDEFAULT_GENERATED on update CURRENT_TIMESTAMP\nField\tType\tNull\tKey\tDefault\tExtra\nid\tint\tNO\tPRI\tNULL\tauto_increment\nscannedEventId\tint\tNO\t\tNULL\t\nmarketId\tvarchar(128)\tNO\t\tNULL\t\ntokenId\tvarchar(256)\tNO\t\tNULL\t\nquestion\ttext\tNO\t\tNULL\t\noutcome\tvarchar(64)\tNO\t\tNULL\t\ncategory\tvarchar(128)\tYES\t\tNULL\t\nentryPrice\tdecimal(10,6)\tNO\t\tNULL\t\nshares\tdecimal(18,6)\tNO\t\tNULL\t\ncostBasis\tdecimal(18,6)\tNO\t\tNULL\t\ncurrentPrice\tdecimal(10,6)\tYES\t\tNULL\t\ncurrentValue\tdecimal(18,6)\tYES\t\tNULL\t\npnl\tdecimal(18,6)\tYES\t\tNULL\t\npnlPercent\tdecimal(10,2)\tYES\t\tNULL\t\nstatus\tenum('open','resolved_win','resolved_loss','sold')\tNO\t\topen\t\nresolvedAt\ttimestamp\tYES\t\tNULL\t\nresolutionPayout\tdecimal(18,6)\tYES\t\tNULL\t\nendDate\ttimestamp\tYES\t\tNULL\t\ncreatedAt\ttimestamp\tNO\t\tCURRENT_TIMESTAMP\t\nupdatedAt\ttimestamp\tNO\t\tCURRENT_TIMESTAMP\tDEFAULT_GENERATED on update CURRENT_TIMESTAMP\nField\tType\tNull\tKey\tDefault\tExtra\nid\tint\tNO\tPRI\tNULL\tauto_increment\nmarketId\tvarchar(128)\tNO\t\tNULL\t\nconditionId\tvarchar(128)\tYES\t\tNULL\t\ntokenId\tvarchar(256)\tYES\t\tNULL\t\nquestion\ttext\tNO\t\tNULL\t\noutcome\tvarchar(64)\tNO\t\tNULL\t\nslug\tvarchar(512)\tYES\t\tNULL\t\neventSlug\tvarchar(512)\tYES\t\tNULL\t\ncategory\tvarchar(128)\tYES\t\tNULL\t\ntags\tjson\tYES\t\tNULL\t\nprice\tdecimal(10,6)\tNO\t\tNULL\t\nliquidity\tdecimal(18,2)\tYES\t\tNULL\t\nvolume\tdecimal(18,2)\tYES\t\tNULL\t\nbestBid\tdecimal(10,6)\tYES\t\tNULL\t\nbestAsk\tdecimal(10,6)\tYES\t\tNULL\t\nspread\tdecimal(10,6)\tYES\t\tNULL\t\nendDate\ttimestamp\tYES\t\tNULL\t\nhoursToResolution\tint\tYES\t\tNULL\t\naiScore\tdecimal(5,2)\tYES\t\tNULL\t\naiReasoning\ttext\tYES\t\tNULL\t\naiEvaluatedAt\ttimestamp\tYES\t\tNULL\t\nstatus\tenum('discovered','evaluated','approved','rejected','ordered','filled','resolved_win','resolved_loss','expired')\tNO\t\tdiscovered\t\ntickSize\tdecimal(10,4)\tYES\t\tNULL\t\nminOrderSize\tint\tYES\t\tNULL\t\nnegRisk\ttinyint(1)\tYES\t\t0\t\ncreatedAt\ttimestamp\tNO\t\tCURRENT_TIMESTAMP\t\nupdatedAt\ttimestamp\tNO\t\tCURRENT_TIMESTAMP\tDEFAULT_GENERATED on update CURRENT_TIMESTAMP\n",
+  "stderr": "",
+  "execution_time_ms": 62
+}

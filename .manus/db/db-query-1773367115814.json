@@ -1,0 +1,58 @@
+{
+  "query": "SELECT COUNT(*) as total_scanned FROM scanned_events; SELECT COUNT(*) as total_orders FROM orders; SELECT COUNT(*) as total_positions FROM positions; SELECT action, details, createdAt FROM scan_logs ORDER BY createdAt DESC LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3qjSsefs24zghQG.d5f38dec7f6c --database YZ9v9D6zNEEycYVBBKJ8og --execute SELECT COUNT(*) as total_scanned FROM scanned_events; SELECT COUNT(*) as total_orders FROM orders; SELECT COUNT(*) as total_positions FROM positions; SELECT action, details, createdAt FROM scan_logs ORDER BY createdAt DESC LIMIT 10;",
+  "rows": [
+    {
+      "total_scanned": "3586"
+    },
+    {
+      "total_scanned": "total_orders"
+    },
+    {
+      "total_scanned": "0"
+    },
+    {
+      "total_scanned": "total_positions"
+    },
+    {
+      "total_scanned": "0"
+    },
+    {
+      "total_scanned": "action\tdetails\tcreatedAt"
+    },
+    {
+      "total_scanned": "clob_init\tCLOB API credentials derived for wallet 0xdE7685...5B215d\t2026-03-13 01:52:39"
+    },
+    {
+      "total_scanned": "kill_switch\tKill switch ACTIVATED\t2026-03-13 01:52:02"
+    },
+    {
+      "total_scanned": "bot_toggle\tBot disabled\t2026-03-13 01:52:02"
+    },
+    {
+      "total_scanned": "bot_toggle\tBot enabled\t2026-03-13 01:52:02"
+    },
+    {
+      "total_scanned": "kill_switch\tKill switch deactivated\t2026-03-13 01:52:02"
+    },
+    {
+      "total_scanned": "kill_switch\tKill switch ACTIVATED\t2026-03-13 01:51:15"
+    },
+    {
+      "total_scanned": "bot_toggle\tBot enabled\t2026-03-13 01:51:15"
+    },
+    {
+      "total_scanned": "kill_switch\tKill switch deactivated\t2026-03-13 01:51:15"
+    },
+    {
+      "total_scanned": "bot_toggle\tBot disabled\t2026-03-13 01:51:15"
+    },
+    {
+      "total_scanned": "bot_toggle\tBot disabled\t2026-03-13 01:00:41"
+    }
+  ],
+  "messages": [],
+  "stdout": "total_scanned\n3586\ntotal_orders\n0\ntotal_positions\n0\naction\tdetails\tcreatedAt\nclob_init\tCLOB API credentials derived for wallet 0xdE7685...5B215d\t2026-03-13 01:52:39\nkill_switch\tKill switch ACTIVATED\t2026-03-13 01:52:02\nbot_toggle\tBot disabled\t2026-03-13 01:52:02\nbot_toggle\tBot enabled\t2026-03-13 01:52:02\nkill_switch\tKill switch deactivated\t2026-03-13 01:52:02\nkill_switch\tKill switch ACTIVATED\t2026-03-13 01:51:15\nbot_toggle\tBot enabled\t2026-03-13 01:51:15\nkill_switch\tKill switch deactivated\t2026-03-13 01:51:15\nbot_toggle\tBot disabled\t2026-03-13 01:51:15\nbot_toggle\tBot disabled\t2026-03-13 01:00:41\n",
+  "stderr": "",
+  "execution_time_ms": 88
+}

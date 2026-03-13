@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import { appRouter } from "./routers";
-import { COOKIE_NAME } from "../shared/const";
 import type { TrpcContext } from "./_core/context";
 
 type AuthenticatedUser = NonNullable<TrpcContext["user"]>;
@@ -88,66 +87,216 @@ describe("autopilot", () => {
   });
 });
 
-describe("smart bet sizing logic", () => {
-  // Test the bet sizing calculation directly
-  function calculateBetSize(
-    aiScore: number,
-    maxPerEvent: number,
-    remainingDailyBudget: number,
-    remainingCapital: number,
-  ): number {
-    const scoreSizeMap: Record<number, number> = {
-      5: 5, 6: 5, 7: 8, 8: 12, 9: 18, 10: 25,
-    };
-    let baseSize = scoreSizeMap[Math.round(aiScore)] || 5;
-    baseSize = Math.min(baseSize, maxPerEvent);
-    if (remainingDailyBudget < baseSize * 2) {
-      baseSize = Math.min(baseSize, Math.floor(remainingDailyBudget / 2));
-    }
-    if (remainingCapital < baseSize * 2) {
-      baseSize = Math.min(baseSize, Math.floor(remainingCapital / 2));
-    }
-    return Math.max(1, baseSize);
+describe("planktonXD flat bet sizing", () => {
+  // The new strategy uses flat $5 bets — no smart sizing
+  // flatBetSize = Math.min(5, maxPerEvent)
+  function calculateFlatBetSize(maxPerEvent: number): number {
+    return Math.min(5, maxPerEvent);
   }
 
-  it("returns $5 for score 5-6", () => {
-    expect(calculateBetSize(5, 25, 200, 2000)).toBe(5);
-    expect(calculateBetSize(6, 25, 200, 2000)).toBe(5);
+  it("returns $5 flat bet by default", () => {
+    expect(calculateFlatBetSize(5)).toBe(5);
+    expect(calculateFlatBetSize(10)).toBe(5);
+    expect(calculateFlatBetSize(25)).toBe(5);
   });
 
-  it("returns $8 for score 7", () => {
-    expect(calculateBetSize(7, 25, 200, 2000)).toBe(8);
+  it("caps at maxPerEvent if lower than $5", () => {
+    expect(calculateFlatBetSize(3)).toBe(3);
+    expect(calculateFlatBetSize(1)).toBe(1);
+  });
+});
+
+describe("event group deduplication", () => {
+  const MAX_POSITIONS_PER_EVENT_GROUP = 2;
+
+  function filterByEventGroup(
+    candidates: Array<{ eventSlug?: string | null; marketId: string }>,
+    existingGroupCounts: Map<string, number>,
+  ): Set<string> {
+    const batchGroupCounts = new Map<string, number>();
+    const allowedMarketIds = new Set<string>();
+
+    for (const event of candidates) {
+      const slug = event.eventSlug || event.marketId;
+      const existingCount = existingGroupCounts.get(slug) || 0;
+      const batchCount = batchGroupCounts.get(slug) || 0;
+      const totalCount = existingCount + batchCount;
+
+      if (totalCount < MAX_POSITIONS_PER_EVENT_GROUP) {
+        batchGroupCounts.set(slug, batchCount + 1);
+        allowedMarketIds.add(event.marketId);
+      }
+    }
+
+    return allowedMarketIds;
+  }
+
+  it("allows candidates from new event groups", () => {
+    const candidates = [
+      { eventSlug: "nba-finals-2026", marketId: "m1" },
+      { eventSlug: "world-cup-2026", marketId: "m2" },
+    ];
+    const existing = new Map<string, number>();
+    const allowed = filterByEventGroup(candidates, existing);
+    expect(allowed.size).toBe(2);
+    expect(allowed.has("m1")).toBe(true);
+    expect(allowed.has("m2")).toBe(true);
   });
 
-  it("returns $12 for score 8", () => {
-    expect(calculateBetSize(8, 25, 200, 2000)).toBe(12);
+  it("blocks candidates from event groups already at max", () => {
+    const candidates = [
+      { eventSlug: "presidential-2028", marketId: "m1" },
+      { eventSlug: "presidential-2028", marketId: "m2" },
+    ];
+    // Already have 2 positions in this group
+    const existing = new Map([["presidential-2028", 2]]);
+    const allowed = filterByEventGroup(candidates, existing);
+    expect(allowed.size).toBe(0);
   });
 
-  it("returns $18 for score 9", () => {
-    expect(calculateBetSize(9, 25, 200, 2000)).toBe(18);
+  it("allows 1 more when group has 1 existing position", () => {
+    const candidates = [
+      { eventSlug: "presidential-2028", marketId: "m1" },
+      { eventSlug: "presidential-2028", marketId: "m2" },
+      { eventSlug: "presidential-2028", marketId: "m3" },
+    ];
+    const existing = new Map([["presidential-2028", 1]]);
+    const allowed = filterByEventGroup(candidates, existing);
+    // Should allow exactly 1 more (to reach max of 2)
+    expect(allowed.size).toBe(1);
+    expect(allowed.has("m1")).toBe(true);
   });
 
-  it("returns $25 for score 10", () => {
-    expect(calculateBetSize(10, 25, 200, 2000)).toBe(25);
+  it("limits within-batch to max per group", () => {
+    const candidates = [
+      { eventSlug: "nba-finals", marketId: "m1" },
+      { eventSlug: "nba-finals", marketId: "m2" },
+      { eventSlug: "nba-finals", marketId: "m3" },
+      { eventSlug: "world-cup", marketId: "m4" },
+    ];
+    const existing = new Map<string, number>();
+    const allowed = filterByEventGroup(candidates, existing);
+    // nba-finals: 2 allowed (max), world-cup: 1 allowed
+    expect(allowed.size).toBe(3);
+    expect(allowed.has("m1")).toBe(true);
+    expect(allowed.has("m2")).toBe(true);
+    expect(allowed.has("m3")).toBe(false);
+    expect(allowed.has("m4")).toBe(true);
   });
 
-  it("caps at maxPerEvent", () => {
-    expect(calculateBetSize(10, 10, 200, 2000)).toBe(10);
-    expect(calculateBetSize(9, 5, 200, 2000)).toBe(5);
+  it("uses marketId as fallback when eventSlug is null", () => {
+    const candidates = [
+      { eventSlug: null, marketId: "unique-market-1" },
+      { eventSlug: null, marketId: "unique-market-2" },
+    ];
+    const existing = new Map<string, number>();
+    const allowed = filterByEventGroup(candidates, existing);
+    expect(allowed.size).toBe(2);
   });
 
-  it("scales down when daily budget is low", () => {
-    expect(calculateBetSize(10, 25, 10, 2000)).toBe(5);
-    expect(calculateBetSize(8, 25, 6, 2000)).toBe(3);
+  it("correctly mixes existing and batch counts", () => {
+    const candidates = [
+      { eventSlug: "group-a", marketId: "m1" },
+      { eventSlug: "group-b", marketId: "m2" },
+      { eventSlug: "group-b", marketId: "m3" },
+      { eventSlug: "group-c", marketId: "m4" },
+    ];
+    const existing = new Map([
+      ["group-a", 1],  // 1 existing, can add 1 more
+      ["group-b", 2],  // already at max, block all
+      // group-c: 0 existing, can add 2
+    ]);
+    const allowed = filterByEventGroup(candidates, existing);
+    expect(allowed.size).toBe(2); // m1 (group-a) + m4 (group-c)
+    expect(allowed.has("m1")).toBe(true);
+    expect(allowed.has("m2")).toBe(false);
+    expect(allowed.has("m3")).toBe(false);
+    expect(allowed.has("m4")).toBe(true);
+  });
+});
+
+describe("category diversification with 15% cap", () => {
+  function canBuyInCategory(
+    category: string,
+    betSize: number,
+    categoryUsage: Map<string, { count: number; totalCost: number }>,
+    totalDeployed: number,
+    maxCategoryPercent: number,
+  ): boolean {
+    const usage = categoryUsage.get(category) || { count: 0, totalCost: 0 };
+    const newTotal = totalDeployed + betSize;
+    const newCatCost = usage.totalCost + betSize;
+    const newPercent = newTotal > 0 ? (newCatCost / newTotal) * 100 : 0;
+    return newPercent <= maxCategoryPercent;
+  }
+
+  it("allows buying when category is under 15% limit", () => {
+    const usage = new Map([["politics", { count: 2, totalCost: 10 }]]);
+    // 10+5 = 15 out of 500+5 = 505 → 2.97% < 15%
+    expect(canBuyInCategory("politics", 5, usage, 500, 15)).toBe(true);
   });
 
-  it("scales down when capital is low", () => {
-    expect(calculateBetSize(10, 25, 200, 10)).toBe(5);
-    expect(calculateBetSize(8, 25, 200, 4)).toBe(2);
+  it("blocks buying when category would exceed 15% limit", () => {
+    const usage = new Map([["politics", { count: 15, totalCost: 75 }]]);
+    // 75+5 = 80 out of 500+5 = 505 → 15.8% > 15%
+    expect(canBuyInCategory("politics", 5, usage, 500, 15)).toBe(false);
   });
 
-  it("returns minimum $1 even with very low budgets", () => {
-    expect(calculateBetSize(5, 25, 3, 3)).toBe(1);
+  it("allows buying at exactly 15%", () => {
+    const usage = new Map([["politics", { count: 14, totalCost: 70 }]]);
+    // 70+5 = 75 out of 500+5 = 505 → 14.85% < 15%
+    expect(canBuyInCategory("politics", 5, usage, 500, 15)).toBe(true);
+  });
+
+  it("allows new category with no existing usage", () => {
+    const usage = new Map<string, { count: number; totalCost: number }>();
+    // 5/(100+5) = 4.76% < 15%
+    expect(canBuyInCategory("sports", 5, usage, 100, 15)).toBe(true);
+  });
+
+  it("blocks first buy when no existing portfolio (100% > 15%)", () => {
+    const usage = new Map<string, { count: number; totalCost: number }>();
+    // 5/(0+5) = 100% > 15%
+    expect(canBuyInCategory("crypto", 5, usage, 0, 15)).toBe(false);
+  });
+
+  it("allows first buy when there is existing portfolio", () => {
+    const usage = new Map<string, { count: number; totalCost: number }>();
+    // 5/(100+5) = 4.76% < 15%
+    expect(canBuyInCategory("crypto", 5, usage, 100, 15)).toBe(true);
+  });
+});
+
+describe("AI reject-only filter scoring", () => {
+  // The new AI evaluator uses scores 1-10:
+  // 1-2 = impossible/absurd → reject
+  // 3+ = plausible enough → buy
+  function shouldBuy(score: number): boolean {
+    return score >= 3;
+  }
+
+  it("rejects score 1 (impossible)", () => {
+    expect(shouldBuy(1)).toBe(false);
+  });
+
+  it("rejects score 2 (absurd)", () => {
+    expect(shouldBuy(2)).toBe(false);
+  });
+
+  it("approves score 3 (unlikely but possible)", () => {
+    expect(shouldBuy(3)).toBe(true);
+  });
+
+  it("approves score 5 (moderate chance)", () => {
+    expect(shouldBuy(5)).toBe(true);
+  });
+
+  it("approves score 7 (good chance)", () => {
+    expect(shouldBuy(7)).toBe(true);
+  });
+
+  it("approves score 10 (very likely)", () => {
+    expect(shouldBuy(10)).toBe(true);
   });
 });
 

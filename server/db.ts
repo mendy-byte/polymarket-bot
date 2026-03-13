@@ -92,7 +92,7 @@ export async function updateScannedEventAi(id: number, score: number, reasoning:
     aiScore: String(score),
     aiReasoning: reasoning,
     aiEvaluatedAt: new Date(),
-    status: score >= 5 ? "evaluated" : "rejected",
+    status: score >= 3 ? "evaluated" : "rejected",
   }).where(eq(scannedEvents.id, id));
 }
 
@@ -106,6 +106,24 @@ export async function getUnevaluatedEvents(limit = 20) {
   const db = await getDb();
   if (!db) return [];
   return db.select().from(scannedEvents).where(eq(scannedEvents.status, "discovered")).orderBy(desc(scannedEvents.liquidity)).limit(limit);
+}
+
+// ===== Event Group Helpers =====
+/**
+ * Get event slugs for a set of scannedEventIds.
+ * Used to check how many positions we already hold in each event group.
+ */
+export async function getEventSlugsForPositions(scannedEventIds: number[]): Promise<Map<number, string>> {
+  const db = await getDb();
+  if (!db || scannedEventIds.length === 0) return new Map();
+  const rows = await db.select({ id: scannedEvents.id, eventSlug: scannedEvents.eventSlug, marketId: scannedEvents.marketId })
+    .from(scannedEvents)
+    .where(inArray(scannedEvents.id, scannedEventIds));
+  const result = new Map<number, string>();
+  for (const r of rows) {
+    result.set(r.id, r.eventSlug || r.marketId);
+  }
+  return result;
 }
 
 // ===== Positions =====

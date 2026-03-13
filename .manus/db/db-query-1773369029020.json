@@ -1,0 +1,30 @@
+{
+  "query": "SELECT 'orders' as tbl, COUNT(*) as cnt FROM orders UNION ALL SELECT 'positions', COUNT(*) FROM positions UNION ALL SELECT 'scanned_events', COUNT(*) FROM scanned_events UNION ALL SELECT 'scan_logs', COUNT(*) FROM scan_logs UNION ALL SELECT 'bot_config', COUNT(*) FROM bot_config",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3qjSsefs24zghQG.d5f38dec7f6c --database YZ9v9D6zNEEycYVBBKJ8og --execute SELECT 'orders' as tbl, COUNT(*) as cnt FROM orders UNION ALL SELECT 'positions', COUNT(*) FROM positions UNION ALL SELECT 'scanned_events', COUNT(*) FROM scanned_events UNION ALL SELECT 'scan_logs', COUNT(*) FROM scan_logs UNION ALL SELECT 'bot_config', COUNT(*) FROM bot_config",
+  "rows": [
+    {
+      "tbl": "positions",
+      "cnt": "19"
+    },
+    {
+      "tbl": "bot_config",
+      "cnt": "9"
+    },
+    {
+      "tbl": "scan_logs",
+      "cnt": "35"
+    },
+    {
+      "tbl": "orders",
+      "cnt": "19"
+    },
+    {
+      "tbl": "scanned_events",
+      "cnt": "3586"
+    }
+  ],
+  "messages": [],
+  "stdout": "tbl\tcnt\npositions\t19\nbot_config\t9\nscan_logs\t35\norders\t19\nscanned_events\t3586\n",
+  "stderr": "",
+  "execution_time_ms": 62
+}

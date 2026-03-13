@@ -18,69 +18,6 @@ describe("CLOB Trading Service", () => {
     });
   });
 
-  describe("Smart Bet Sizing (via autopilot)", () => {
-    // Test the bet sizing logic directly
-    function calculateBetSize(
-      aiScore: number,
-      maxPerEvent: number,
-      remainingDailyBudget: number,
-      remainingCapital: number,
-    ): number {
-      const scoreSizeMap: Record<number, number> = {
-        5: 5, 6: 5, 7: 8, 8: 12, 9: 18, 10: 25,
-      };
-      let baseSize = scoreSizeMap[Math.round(aiScore)] || 5;
-      baseSize = Math.min(baseSize, maxPerEvent);
-      if (remainingDailyBudget < baseSize * 2) {
-        baseSize = Math.min(baseSize, Math.floor(remainingDailyBudget / 2));
-      }
-      if (remainingCapital < baseSize * 2) {
-        baseSize = Math.min(baseSize, Math.floor(remainingCapital / 2));
-      }
-      return Math.max(1, baseSize);
-    }
-
-    it("returns $5 for score 5-6", () => {
-      expect(calculateBetSize(5, 25, 500, 2000)).toBe(5);
-      expect(calculateBetSize(6, 25, 500, 2000)).toBe(5);
-    });
-
-    it("returns $8 for score 7", () => {
-      expect(calculateBetSize(7, 25, 500, 2000)).toBe(8);
-    });
-
-    it("returns $12 for score 8", () => {
-      expect(calculateBetSize(8, 25, 500, 2000)).toBe(12);
-    });
-
-    it("returns $18 for score 9", () => {
-      expect(calculateBetSize(9, 25, 500, 2000)).toBe(18);
-    });
-
-    it("returns $25 for score 10", () => {
-      expect(calculateBetSize(10, 25, 500, 2000)).toBe(25);
-    });
-
-    it("caps at maxPerEvent", () => {
-      expect(calculateBetSize(10, 10, 500, 2000)).toBe(10);
-      expect(calculateBetSize(9, 5, 500, 2000)).toBe(5);
-    });
-
-    it("scales down when daily budget is low", () => {
-      // $10 remaining daily, score 10 wants $25, but 10/2 = 5
-      expect(calculateBetSize(10, 25, 10, 2000)).toBe(5);
-    });
-
-    it("scales down when capital is low", () => {
-      // $6 remaining capital, score 10 wants $25, but 6/2 = 3
-      expect(calculateBetSize(10, 25, 500, 6)).toBe(3);
-    });
-
-    it("returns minimum $1 even with very low budgets", () => {
-      expect(calculateBetSize(5, 25, 2, 2)).toBe(1);
-    });
-  });
-
   describe("Order Result Types", () => {
     it("success result has orderId", () => {
       const result = {
@@ -110,7 +47,7 @@ describe("CLOB Trading Service", () => {
     });
   });
 
-  describe("Category Diversification", () => {
+  describe("Category Diversification (15% cap)", () => {
     function canBuyInCategory(
       category: string,
       betSize: number,
@@ -125,35 +62,33 @@ describe("CLOB Trading Service", () => {
       return newPercent <= maxCategoryPercent;
     }
 
-    it("allows buying when category is under limit", () => {
+    it("allows buying when category is under 15% limit", () => {
       const usage = new Map([["politics", { count: 5, totalCost: 50 }]]);
-      expect(canBuyInCategory("politics", 5, usage, 500, 30)).toBe(true);
+      // 55/505 = 10.9% < 15%
+      expect(canBuyInCategory("politics", 5, usage, 500, 15)).toBe(true);
     });
 
-    it("blocks buying when category would exceed limit", () => {
-      const usage = new Map([["politics", { count: 20, totalCost: 290 }]]);
-      // 290 + 5 = 295 out of 500 + 5 = 505 → 58.4% > 30%
-      expect(canBuyInCategory("politics", 5, usage, 500, 30)).toBe(false);
+    it("blocks buying when category would exceed 15% limit", () => {
+      const usage = new Map([["politics", { count: 15, totalCost: 75 }]]);
+      // 80/505 = 15.8% > 15%
+      expect(canBuyInCategory("politics", 5, usage, 500, 15)).toBe(false);
     });
 
     it("allows new category with no existing usage", () => {
       const usage = new Map<string, { count: number; totalCost: number }>();
-      expect(canBuyInCategory("sports", 5, usage, 100, 30)).toBe(true);
+      expect(canBuyInCategory("sports", 5, usage, 100, 15)).toBe(true);
     });
 
     it("handles zero total deployed", () => {
       const usage = new Map<string, { count: number; totalCost: number }>();
-      // When totalDeployed=0, buying $5 makes this category 5/5=100% which exceeds 30%
-      // This is correct behavior - first bet always goes through because the limit
-      // should be checked against total portfolio, not just this category
-      // Actually: 5/(0+5) = 100% > 30%, so it correctly blocks
-      expect(canBuyInCategory("crypto", 5, usage, 0, 30)).toBe(false);
+      // 5/(0+5) = 100% > 15%, correctly blocks
+      expect(canBuyInCategory("crypto", 5, usage, 0, 15)).toBe(false);
     });
 
     it("allows first buy when there is existing portfolio", () => {
       const usage = new Map<string, { count: number; totalCost: number }>();
-      // 5/(100+5) = 4.76% < 30%, so this should pass
-      expect(canBuyInCategory("crypto", 5, usage, 100, 30)).toBe(true);
+      // 5/(100+5) = 4.76% < 15%
+      expect(canBuyInCategory("crypto", 5, usage, 100, 15)).toBe(true);
     });
   });
 
@@ -161,7 +96,6 @@ describe("CLOB Trading Service", () => {
     it("detects env var wallet config", () => {
       const privateKey = process.env.POLYGON_PRIVATE_KEY;
       const walletAddress = process.env.POLYGON_WALLET_ADDRESS;
-      // These may or may not be set, but the logic should handle both cases
       const configured = !!(privateKey || walletAddress);
       expect(typeof configured).toBe("boolean");
     });

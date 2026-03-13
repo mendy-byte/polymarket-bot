@@ -1,0 +1,14 @@
+{
+  "query": "SELECT `key`, `value` FROM bot_config WHERE `key` = 'maxPerEvent';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3qjSsefs24zghQG.d5f38dec7f6c --database YZ9v9D6zNEEycYVBBKJ8og --execute SELECT `key`, `value` FROM bot_config WHERE `key` = 'maxPerEvent';",
+  "rows": [
+    {
+      "key": "maxPerEvent",
+      "value": "10"
+    }
+  ],
+  "messages": [],
+  "stdout": "key\tvalue\nmaxPerEvent\t10\n",
+  "stderr": "",
+  "execution_time_ms": 149
+}

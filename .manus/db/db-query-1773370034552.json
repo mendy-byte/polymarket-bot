@@ -1,0 +1,28 @@
+{
+  "query": "SELECT status, COUNT(*) as cnt, MIN(CAST(aiScore AS DECIMAL(5,2))) as min_score, MAX(CAST(aiScore AS DECIMAL(5,2))) as max_score FROM scanned_events GROUP BY status ORDER BY cnt DESC;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3qjSsefs24zghQG.d5f38dec7f6c --database YZ9v9D6zNEEycYVBBKJ8og --execute SELECT status, COUNT(*) as cnt, MIN(CAST(aiScore AS DECIMAL(5,2))) as min_score, MAX(CAST(aiScore AS DECIMAL(5,2))) as max_score FROM scanned_events GROUP BY status ORDER BY cnt DESC;",
+  "rows": [
+    {
+      "status": "discovered",
+      "cnt": "3546",
+      "min_score": "0.00",
+      "max_score": "0.00"
+    },
+    {
+      "status": "evaluated",
+      "cnt": "21",
+      "min_score": "1.00",
+      "max_score": "7.00"
+    },
+    {
+      "status": "ordered",
+      "cnt": "19",
+      "min_score": "5.00",
+      "max_score": "7.00"
+    }
+  ],
+  "messages": [],
+  "stdout": "status\tcnt\tmin_score\tmax_score\ndiscovered\t3546\t0.00\t0.00\nevaluated\t21\t1.00\t7.00\nordered\t19\t5.00\t7.00\n",
+  "stderr": "",
+  "execution_time_ms": 64
+}
