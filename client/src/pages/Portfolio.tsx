@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { trpc } from "@/lib/trpc";
-import { Loader2, Briefcase, FileText } from "lucide-react";
+import { Loader2, Briefcase, FileText, Clock } from "lucide-react";
 
 function formatUsd(val: number | string): string {
   const n = typeof val === "string" ? parseFloat(val) : val;
@@ -17,6 +17,41 @@ function PnlDisplay({ pnl, pnlPercent }: { pnl: string | null; pnlPercent: strin
     <span className={`font-mono text-sm ${n >= 0 ? "text-profit" : "text-loss"}`}>
       {n >= 0 ? "+" : ""}{formatUsd(n)} ({p >= 0 ? "+" : ""}{p.toFixed(1)}%)
     </span>
+  );
+}
+
+function formatTimeUntil(dateStr: string | null | undefined): { text: string; urgency: "soon" | "medium" | "far" | "expired" | "unknown" } {
+  if (!dateStr) return { text: "--", urgency: "unknown" };
+  const now = Date.now();
+  const end = new Date(dateStr).getTime();
+  if (isNaN(end)) return { text: "--", urgency: "unknown" };
+  const diff = end - now;
+  if (diff < 0) return { text: "Expired", urgency: "expired" };
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  if (days === 0) return { text: `${hours}h`, urgency: "soon" };
+  if (days < 7) return { text: `${days}d ${hours}h`, urgency: "soon" };
+  if (days < 30) return { text: `${days}d`, urgency: "medium" };
+  if (days < 365) return { text: `${Math.floor(days / 30)}mo ${days % 30}d`, urgency: "far" };
+  return { text: `${(days / 365).toFixed(1)}yr`, urgency: "far" };
+}
+
+function ExpiryDisplay({ endDate }: { endDate: string | Date | null | undefined }) {
+  const dateStr = endDate instanceof Date ? endDate.toISOString() : endDate;
+  const { text, urgency } = formatTimeUntil(dateStr);
+  const colorMap = {
+    soon: "text-warning",
+    medium: "text-primary",
+    far: "text-muted-foreground",
+    expired: "text-loss",
+    unknown: "text-muted-foreground",
+  };
+  const dateLabel = endDate ? new Date(endDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "";
+  return (
+    <div className="text-right">
+      <span className={`font-mono text-sm ${colorMap[urgency]}`}>{text}</span>
+      {dateLabel && <p className="text-xs text-muted-foreground">{dateLabel}</p>}
+    </div>
   );
 }
 
@@ -60,6 +95,7 @@ function PositionsTable() {
             <th className="text-right p-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">Cost</th>
             <th className="text-right p-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">Current</th>
             <th className="text-right p-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">P&L</th>
+            <th className="text-right p-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">Expires</th>
             <th className="text-center p-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">Status</th>
           </tr>
         </thead>
@@ -76,6 +112,7 @@ function PositionsTable() {
               <td className="p-3 text-right font-mono text-foreground">{formatUsd(pos.costBasis)}</td>
               <td className="p-3 text-right font-mono text-foreground">{pos.currentPrice ? `$${parseFloat(pos.currentPrice).toFixed(4)}` : "--"}</td>
               <td className="p-3 text-right"><PnlDisplay pnl={pos.pnl} pnlPercent={pos.pnlPercent} /></td>
+              <td className="p-3"><ExpiryDisplay endDate={pos.endDate} /></td>
               <td className="p-3 text-center"><StatusBadge status={pos.status} /></td>
             </tr>
           ))}

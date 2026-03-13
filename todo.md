@@ -62,3 +62,4 @@
 - [x] Increase scan pages from 50 to 75 per cycle (default + DB config)
 - [x] Add order fill rate tracking: checkOrderFills() in clobTrader, runs each cycle, dashboard shows fill rate bar
 - [x] Note: planktonXD started with $1K in Feb 2025
+- [x] Add expiry/resolution date column to portfolio page with time-until-expiry display
