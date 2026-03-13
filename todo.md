@@ -72,3 +72,4 @@
 - [x] Add Refresh Prices button to Portfolio page (fetch current market prices for all open positions on demand)
 - [x] Fix CLOB heartbeat error loop (stop spamming Invalid Heartbeat ID errors, add reconnect-on-error logic)
 - [x] Resolve proxy issue for Polymarket trading (fixed microsocks on Amsterdam droplet, added auth, systemd auto-restart)
+- [x] Clean up 78 ghost orders: mark as failed, close phantom positions, correct budget/spend tracking

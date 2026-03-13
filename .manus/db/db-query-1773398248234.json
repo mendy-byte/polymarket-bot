@@ -1,0 +1,52 @@
+{
+  "query": "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'orders' ORDER BY ORDINAL_POSITION",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3qjSsefs24zghQG.d5f38dec7f6c --database YZ9v9D6zNEEycYVBBKJ8og --execute SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'orders' ORDER BY ORDINAL_POSITION",
+  "rows": [
+    {
+      "COLUMN_NAME": "id"
+    },
+    {
+      "COLUMN_NAME": "scannedEventId"
+    },
+    {
+      "COLUMN_NAME": "orderId"
+    },
+    {
+      "COLUMN_NAME": "marketId"
+    },
+    {
+      "COLUMN_NAME": "tokenId"
+    },
+    {
+      "COLUMN_NAME": "side"
+    },
+    {
+      "COLUMN_NAME": "price"
+    },
+    {
+      "COLUMN_NAME": "size"
+    },
+    {
+      "COLUMN_NAME": "amountUsd"
+    },
+    {
+      "COLUMN_NAME": "status"
+    },
+    {
+      "COLUMN_NAME": "errorMessage"
+    },
+    {
+      "COLUMN_NAME": "filledAt"
+    },
+    {
+      "COLUMN_NAME": "createdAt"
+    },
+    {
+      "COLUMN_NAME": "updatedAt"
+    }
+  ],
+  "messages": [],
+  "stdout": "COLUMN_NAME\nid\nscannedEventId\norderId\nmarketId\ntokenId\nside\nprice\nsize\namountUsd\nstatus\nerrorMessage\nfilledAt\ncreatedAt\nupdatedAt\n",
+  "stderr": "",
+  "execution_time_ms": 60
+}
