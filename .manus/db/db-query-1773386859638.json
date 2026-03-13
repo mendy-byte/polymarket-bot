@@ -1,0 +1,15 @@
+{
+  "query": "SELECT DATE_FORMAT(MIN(createdAt), '%Y-%m-%d %H:%i:%s') as earliest, DATE_FORMAT(MAX(createdAt), '%Y-%m-%d %H:%i:%s') as latest, COUNT(*) as cnt FROM orders;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3qjSsefs24zghQG.d5f38dec7f6c --database YZ9v9D6zNEEycYVBBKJ8og --execute SELECT DATE_FORMAT(MIN(createdAt), '%Y-%m-%d %H:%i:%s') as earliest, DATE_FORMAT(MAX(createdAt), '%Y-%m-%d %H:%i:%s') as latest, COUNT(*) as cnt FROM orders;",
+  "rows": [
+    {
+      "earliest": "2026-03-13 02:14:05",
+      "latest": "2026-03-13 04:46:17",
+      "cnt": "77"
+    }
+  ],
+  "messages": [],
+  "stdout": "earliest\tlatest\tcnt\n2026-03-13 02:14:05\t2026-03-13 04:46:17\t77\n",
+  "stderr": "",
+  "execution_time_ms": 57
+}

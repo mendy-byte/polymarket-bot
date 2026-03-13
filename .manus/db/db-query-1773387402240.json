@@ -1,0 +1,9 @@
+{
+  "query": "INSERT INTO bot_config (`key`, value, description) VALUES ('dailyBuyBudget', '300', 'Daily buy budget in USD') ON DUPLICATE KEY UPDATE value = '300';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3qjSsefs24zghQG.d5f38dec7f6c --database YZ9v9D6zNEEycYVBBKJ8og --execute INSERT INTO bot_config (`key`, value, description) VALUES ('dailyBuyBudget', '300', 'Daily buy budget in USD') ON DUPLICATE KEY UPDATE value = '300';",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 65
+}

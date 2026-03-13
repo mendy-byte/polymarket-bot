@@ -69,3 +69,4 @@
 - [x] Adjust short:long event ratio from 2:1 to 4:1 to match planktonXD's heavy short-dated focus
 - [x] Add resolved positions summary view to Portfolio page (win/loss history, P&L by category, resolution timeline)
 - [x] Fix daily budget reset to use EST timezone instead of UTC
+- [x] Add Refresh Prices button to Portfolio page (fetch current market prices for all open positions on demand)

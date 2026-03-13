@@ -198,6 +198,26 @@ export const appRouter = router({
     resolvedSummary: protectedProcedure.query(async () => {
       return db.getResolvedPositionsSummary();
     }),
+    refreshPrices: protectedProcedure.mutation(async () => {
+      const openPositions = await db.getPositions("open");
+      if (openPositions.length === 0) return { updated: 0, total: 0 };
+
+      let updated = 0;
+      for (let i = 0; i < openPositions.length; i++) {
+        const pos = openPositions[i];
+        try {
+          const ob = await analyzeOrderbook(pos.tokenId);
+          if (ob.bestBid !== null) {
+            await db.updatePositionPrice(pos.id, ob.bestBid);
+            updated++;
+          }
+        } catch {
+          // skip individual price update errors
+        }
+      }
+
+      return { updated, total: openPositions.length };
+    }),
     placeOrder: protectedProcedure.input(z.object({
       scannedEventId: z.number(),
       amountUsd: z.number().min(0.05).max(25),

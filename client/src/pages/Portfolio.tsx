@@ -3,7 +3,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { trpc } from "@/lib/trpc";
-import { Loader2, Briefcase, FileText, Clock, Trophy, XCircle, TrendingUp, TrendingDown, BarChart3, Target } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Loader2, Briefcase, FileText, Clock, Trophy, XCircle, TrendingUp, TrendingDown, BarChart3, Target, RefreshCw } from "lucide-react";
+import { toast } from "sonner";
 
 function formatUsd(val: number | string): string {
   const n = typeof val === "string" ? parseFloat(val) : val;
@@ -72,6 +74,16 @@ function StatusBadge({ status }: { status: string }) {
 
 function PositionsTable() {
   const { data: positions, isLoading } = trpc.portfolio.positions.useQuery({}, { refetchInterval: 15000 });
+  const utils = trpc.useUtils();
+  const refreshPrices = trpc.portfolio.refreshPrices.useMutation({
+    onSuccess: (result) => {
+      utils.portfolio.positions.invalidate();
+      toast.success(`Prices refreshed: ${result.updated}/${result.total} positions updated`);
+    },
+    onError: (err) => {
+      toast.error(`Refresh failed: ${err.message}`);
+    },
+  });
 
   if (isLoading) return <div className="flex items-center justify-center h-32"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
   if (!positions || positions.length === 0) {
@@ -84,7 +96,21 @@ function PositionsTable() {
   }
 
   return (
-    <div className="overflow-x-auto">
+    <div>
+      <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+        <p className="text-sm text-muted-foreground">{positions.length} positions</p>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => refreshPrices.mutate()}
+          disabled={refreshPrices.isPending}
+          className="gap-2"
+        >
+          <RefreshCw className={`h-3.5 w-3.5 ${refreshPrices.isPending ? "animate-spin" : ""}`} />
+          {refreshPrices.isPending ? "Refreshing..." : "Refresh Prices"}
+        </Button>
+      </div>
+      <div className="overflow-x-auto">
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-border bg-muted/30">
@@ -118,6 +144,7 @@ function PositionsTable() {
           ))}
         </tbody>
       </table>
+      </div>
     </div>
   );
 }

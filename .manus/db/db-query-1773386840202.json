@@ -1,0 +1,40 @@
+{
+  "query": "SELECT id, amountUsd, status, createdAt FROM orders ORDER BY id DESC LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3qjSsefs24zghQG.d5f38dec7f6c --database YZ9v9D6zNEEycYVBBKJ8og --execute SELECT id, amountUsd, status, createdAt FROM orders ORDER BY id DESC LIMIT 5;",
+  "rows": [
+    {
+      "id": "77",
+      "amountUsd": "5.000000",
+      "status": "placed",
+      "createdAt": "2026-03-13 04:46:17"
+    },
+    {
+      "id": "76",
+      "amountUsd": "5.000000",
+      "status": "placed",
+      "createdAt": "2026-03-13 04:46:16"
+    },
+    {
+      "id": "75",
+      "amountUsd": "5.000000",
+      "status": "placed",
+      "createdAt": "2026-03-13 04:46:15"
+    },
+    {
+      "id": "74",
+      "amountUsd": "5.000000",
+      "status": "placed",
+      "createdAt": "2026-03-13 04:46:13"
+    },
+    {
+      "id": "73",
+      "amountUsd": "5.000000",
+      "status": "placed",
+      "createdAt": "2026-03-13 04:46:12"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tamountUsd\tstatus\tcreatedAt\n77\t5.000000\tplaced\t2026-03-13 04:46:17\n76\t5.000000\tplaced\t2026-03-13 04:46:16\n75\t5.000000\tplaced\t2026-03-13 04:46:15\n74\t5.000000\tplaced\t2026-03-13 04:46:13\n73\t5.000000\tplaced\t2026-03-13 04:46:12\n",
+  "stderr": "",
+  "execution_time_ms": 66
+}

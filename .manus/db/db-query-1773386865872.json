@@ -1,0 +1,20 @@
+{
+  "query": "SELECT 'before_est_midnight' as period, COUNT(*) as cnt, SUM(CAST(amountUsd AS DECIMAL(18,2))) as spent FROM orders WHERE createdAt < '2026-03-13 04:00:00' UNION ALL SELECT 'after_est_midnight', COUNT(*), SUM(CAST(amountUsd AS DECIMAL(18,2))) FROM orders WHERE createdAt >= '2026-03-13 04:00:00';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3qjSsefs24zghQG.d5f38dec7f6c --database YZ9v9D6zNEEycYVBBKJ8og --execute SELECT 'before_est_midnight' as period, COUNT(*) as cnt, SUM(CAST(amountUsd AS DECIMAL(18,2))) as spent FROM orders WHERE createdAt < '2026-03-13 04:00:00' UNION ALL SELECT 'after_est_midnight', COUNT(*), SUM(CAST(amountUsd AS DECIMAL(18,2))) FROM orders WHERE createdAt >= '2026-03-13 04:00:00';",
+  "rows": [
+    {
+      "period": "after_est_midnight",
+      "cnt": "40",
+      "spent": "200.00"
+    },
+    {
+      "period": "before_est_midnight",
+      "cnt": "37",
+      "spent": "199.97"
+    }
+  ],
+  "messages": [],
+  "stdout": "period\tcnt\tspent\nafter_est_midnight\t40\t200.00\nbefore_est_midnight\t37\t199.97\n",
+  "stderr": "",
+  "execution_time_ms": 60
+}

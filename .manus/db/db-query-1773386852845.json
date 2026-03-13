@@ -1,0 +1,30 @@
+{
+  "query": "SELECT DATE_FORMAT(createdAt, '%Y-%m-%d %H:%i:%s') as ts, amountUsd FROM orders ORDER BY createdAt DESC LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3qjSsefs24zghQG.d5f38dec7f6c --database YZ9v9D6zNEEycYVBBKJ8og --execute SELECT DATE_FORMAT(createdAt, '%Y-%m-%d %H:%i:%s') as ts, amountUsd FROM orders ORDER BY createdAt DESC LIMIT 5;",
+  "rows": [
+    {
+      "ts": "2026-03-13 04:46:17",
+      "amountUsd": "5.000000"
+    },
+    {
+      "ts": "2026-03-13 04:46:16",
+      "amountUsd": "5.000000"
+    },
+    {
+      "ts": "2026-03-13 04:46:15",
+      "amountUsd": "5.000000"
+    },
+    {
+      "ts": "2026-03-13 04:46:13",
+      "amountUsd": "5.000000"
+    },
+    {
+      "ts": "2026-03-13 04:46:12",
+      "amountUsd": "5.000000"
+    }
+  ],
+  "messages": [],
+  "stdout": "ts\tamountUsd\n2026-03-13 04:46:17\t5.000000\n2026-03-13 04:46:16\t5.000000\n2026-03-13 04:46:15\t5.000000\n2026-03-13 04:46:13\t5.000000\n2026-03-13 04:46:12\t5.000000\n",
+  "stderr": "",
+  "execution_time_ms": 58
+}
