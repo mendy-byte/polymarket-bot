@@ -1,0 +1,85 @@
+{
+  "query": "SELECT id, status, CAST(createdAt AS CHAR) as created FROM orders ORDER BY id DESC LIMIT 15;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3qjSsefs24zghQG.d5f38dec7f6c --database YZ9v9D6zNEEycYVBBKJ8og --execute SELECT id, status, CAST(createdAt AS CHAR) as created FROM orders ORDER BY id DESC LIMIT 15;",
+  "rows": [
+    {
+      "id": "77",
+      "status": "placed",
+      "created": "2026-03-13 04:46:17"
+    },
+    {
+      "id": "76",
+      "status": "placed",
+      "created": "2026-03-13 04:46:16"
+    },
+    {
+      "id": "75",
+      "status": "placed",
+      "created": "2026-03-13 04:46:15"
+    },
+    {
+      "id": "74",
+      "status": "placed",
+      "created": "2026-03-13 04:46:13"
+    },
+    {
+      "id": "73",
+      "status": "placed",
+      "created": "2026-03-13 04:46:12"
+    },
+    {
+      "id": "72",
+      "status": "placed",
+      "created": "2026-03-13 04:46:11"
+    },
+    {
+      "id": "71",
+      "status": "placed",
+      "created": "2026-03-13 04:46:10"
+    },
+    {
+      "id": "70",
+      "status": "placed",
+      "created": "2026-03-13 04:46:08"
+    },
+    {
+      "id": "69",
+      "status": "placed",
+      "created": "2026-03-13 04:46:07"
+    },
+    {
+      "id": "68",
+      "status": "placed",
+      "created": "2026-03-13 04:46:06"
+    },
+    {
+      "id": "67",
+      "status": "placed",
+      "created": "2026-03-13 04:46:05"
+    },
+    {
+      "id": "66",
+      "status": "placed",
+      "created": "2026-03-13 04:46:04"
+    },
+    {
+      "id": "65",
+      "status": "placed",
+      "created": "2026-03-13 04:46:02"
+    },
+    {
+      "id": "64",
+      "status": "placed",
+      "created": "2026-03-13 04:46:01"
+    },
+    {
+      "id": "63",
+      "status": "placed",
+      "created": "2026-03-13 04:46:00"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tstatus\tcreated\n77\tplaced\t2026-03-13 04:46:17\n76\tplaced\t2026-03-13 04:46:16\n75\tplaced\t2026-03-13 04:46:15\n74\tplaced\t2026-03-13 04:46:13\n73\tplaced\t2026-03-13 04:46:12\n72\tplaced\t2026-03-13 04:46:11\n71\tplaced\t2026-03-13 04:46:10\n70\tplaced\t2026-03-13 04:46:08\n69\tplaced\t2026-03-13 04:46:07\n68\tplaced\t2026-03-13 04:46:06\n67\tplaced\t2026-03-13 04:46:05\n66\tplaced\t2026-03-13 04:46:04\n65\tplaced\t2026-03-13 04:46:02\n64\tplaced\t2026-03-13 04:46:01\n63\tplaced\t2026-03-13 04:46:00\n",
+  "stderr": "",
+  "execution_time_ms": 76
+}

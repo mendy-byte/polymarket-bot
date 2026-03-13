@@ -1,15 +1,25 @@
 import { eq, and, gte, sql, desc, inArray } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
+import mysql from "mysql2";
 import { InsertUser, users, scannedEvents, positions, orders, botConfig, scanLogs } from "../drizzle/schema";
 import type { InsertScannedEvent, InsertPosition, InsertOrder } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
+let _pool: mysql.Pool | null = null;
 
 export async function getDb() {
   if (!_db && process.env.DATABASE_URL) {
     try {
-      _db = drizzle(process.env.DATABASE_URL);
+      _pool = mysql.createPool({
+        uri: process.env.DATABASE_URL,
+        connectTimeout: 10000,
+        waitForConnections: true,
+        connectionLimit: 5,
+        enableKeepAlive: true,
+        keepAliveInitialDelay: 10000,
+      }) as any;
+      _db = drizzle(_pool as any);
     } catch (error) {
       console.warn("[Database] Failed to connect:", error);
       _db = null;

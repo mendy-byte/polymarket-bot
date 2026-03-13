@@ -1,0 +1,37 @@
+{
+  "query": "SELECT COUNT(*) as total_orders FROM orders; SELECT COUNT(*) as total_positions FROM positions; SELECT action, details, createdAt FROM scan_logs ORDER BY createdAt DESC LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3qjSsefs24zghQG.d5f38dec7f6c --database YZ9v9D6zNEEycYVBBKJ8og --execute SELECT COUNT(*) as total_orders FROM orders; SELECT COUNT(*) as total_positions FROM positions; SELECT action, details, createdAt FROM scan_logs ORDER BY createdAt DESC LIMIT 5;",
+  "rows": [
+    {
+      "total_orders": "77"
+    },
+    {
+      "total_orders": "total_positions"
+    },
+    {
+      "total_orders": "77"
+    },
+    {
+      "total_orders": "action\tdetails\tcreatedAt"
+    },
+    {
+      "total_orders": "autopilot\tScanned: 0 cheap outcomes | New: 0 | AI: 0 evaluated, 0 rejected | Orders: 0 ($0.00) across 0 categories | Resolutions: 0W/0L | Errors: Daily budget exhausted: $399.94 / $200\t2026-03-13 05:25:35"
+    },
+    {
+      "total_orders": "autopilot\tScanned: 0 cheap outcomes | New: 0 | AI: 0 evaluated, 0 rejected | Orders: 0 ($0.00) across 0 categories | Resolutions: 0W/0L | Errors: Daily budget exhausted: $200.00 / $200\t2026-03-13 05:24:20"
+    },
+    {
+      "total_orders": "autopilot\tScanned: 0 cheap outcomes | New: 0 | AI: 0 evaluated, 0 rejected | Orders: 0 ($0.00) across 0 categories | Resolutions: 0W/0L | Errors: Daily budget exhausted: $200.00 / $200\t2026-03-13 05:17:26"
+    },
+    {
+      "total_orders": "autopilot\tScanned: 0 cheap outcomes | New: 0 | AI: 0 evaluated, 0 rejected | Orders: 0 ($0.00) across 0 categories | Resolutions: 0W/0L | Errors: Daily budget exhausted: $200.00 / $200\t2026-03-13 05:16:56"
+    },
+    {
+      "total_orders": "autopilot\tScanned: 4003 cheap outcomes | New: 4003 | AI: 100 evaluated, 1 rejected | Orders: 0 ($0.00) across 0 categories | Resolutions: 0W/0L\t2026-03-13 05:12:06"
+    }
+  ],
+  "messages": [],
+  "stdout": "total_orders\n77\ntotal_positions\n77\naction\tdetails\tcreatedAt\nautopilot\tScanned: 0 cheap outcomes | New: 0 | AI: 0 evaluated, 0 rejected | Orders: 0 ($0.00) across 0 categories | Resolutions: 0W/0L | Errors: Daily budget exhausted: $399.94 / $200\t2026-03-13 05:25:35\nautopilot\tScanned: 0 cheap outcomes | New: 0 | AI: 0 evaluated, 0 rejected | Orders: 0 ($0.00) across 0 categories | Resolutions: 0W/0L | Errors: Daily budget exhausted: $200.00 / $200\t2026-03-13 05:24:20\nautopilot\tScanned: 0 cheap outcomes | New: 0 | AI: 0 evaluated, 0 rejected | Orders: 0 ($0.00) across 0 categories | Resolutions: 0W/0L | Errors: Daily budget exhausted: $200.00 / $200\t2026-03-13 05:17:26\nautopilot\tScanned: 0 cheap outcomes | New: 0 | AI: 0 evaluated, 0 rejected | Orders: 0 ($0.00) across 0 categories | Resolutions: 0W/0L | Errors: Daily budget exhausted: $200.00 / $200\t2026-03-13 05:16:56\nautopilot\tScanned: 4003 cheap outcomes | New: 4003 | AI: 100 evaluated, 1 rejected | Orders: 0 ($0.00) across 0 categories | Resolutions: 0W/0L\t2026-03-13 05:12:06\n",
+  "stderr": "",
+  "execution_time_ms": 71
+}

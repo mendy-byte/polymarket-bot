@@ -1,0 +1,37 @@
+{
+  "query": "SELECT COUNT(*) as total_scanned FROM scanned_events;\nSELECT MAX(id) as latest_id FROM scanned_events;\nSELECT COUNT(*) as total_orders FROM orders;\nSELECT MAX(id) as latest_order_id FROM orders;\nSELECT COUNT(*) as total_positions FROM positions;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3qjSsefs24zghQG.d5f38dec7f6c --database YZ9v9D6zNEEycYVBBKJ8og --execute SELECT COUNT(*) as total_scanned FROM scanned_events;\nSELECT MAX(id) as latest_id FROM scanned_events;\nSELECT COUNT(*) as total_orders FROM orders;\nSELECT MAX(id) as latest_order_id FROM orders;\nSELECT COUNT(*) as total_positions FROM positions;",
+  "rows": [
+    {
+      "total_scanned": "4177"
+    },
+    {
+      "total_scanned": "latest_id"
+    },
+    {
+      "total_scanned": "4177"
+    },
+    {
+      "total_scanned": "total_orders"
+    },
+    {
+      "total_scanned": "77"
+    },
+    {
+      "total_scanned": "latest_order_id"
+    },
+    {
+      "total_scanned": "77"
+    },
+    {
+      "total_scanned": "total_positions"
+    },
+    {
+      "total_scanned": "77"
+    }
+  ],
+  "messages": [],
+  "stdout": "total_scanned\n4177\nlatest_id\n4177\ntotal_orders\n77\nlatest_order_id\n77\ntotal_positions\n77\n",
+  "stderr": "",
+  "execution_time_ms": 82
+}

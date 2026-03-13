@@ -1,0 +1,25 @@
+{
+  "query": "SELECT COUNT(*) as total FROM scanned_events;\nSELECT COUNT(*) as total FROM orders;\nSELECT COUNT(*) as total FROM positions;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3qjSsefs24zghQG.d5f38dec7f6c --database YZ9v9D6zNEEycYVBBKJ8og --execute SELECT COUNT(*) as total FROM scanned_events;\nSELECT COUNT(*) as total FROM orders;\nSELECT COUNT(*) as total FROM positions;",
+  "rows": [
+    {
+      "total": "4177"
+    },
+    {
+      "total": "total"
+    },
+    {
+      "total": "77"
+    },
+    {
+      "total": "total"
+    },
+    {
+      "total": "77"
+    }
+  ],
+  "messages": [],
+  "stdout": "total\n4177\ntotal\n77\ntotal\n77\n",
+  "stderr": "",
+  "execution_time_ms": 75
+}

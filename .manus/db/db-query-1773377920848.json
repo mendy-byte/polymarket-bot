@@ -1,0 +1,45 @@
+{
+  "query": "SELECT id, action, ordersPlaced, errors, CAST(createdAt AS CHAR) as created FROM scan_logs ORDER BY id DESC LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3qjSsefs24zghQG.d5f38dec7f6c --database YZ9v9D6zNEEycYVBBKJ8og --execute SELECT id, action, ordersPlaced, errors, CAST(createdAt AS CHAR) as created FROM scan_logs ORDER BY id DESC LIMIT 5;",
+  "rows": [
+    {
+      "id": "30101",
+      "action": "autopilot",
+      "ordersPlaced": "0",
+      "errors": "1",
+      "created": "2026-03-13 04:50:11"
+    },
+    {
+      "id": "30100",
+      "action": "autopilot",
+      "ordersPlaced": "0",
+      "errors": "1",
+      "created": "2026-03-13 04:47:11"
+    },
+    {
+      "id": "30099",
+      "action": "autopilot",
+      "ordersPlaced": "40",
+      "errors": "0",
+      "created": "2026-03-13 04:46:18"
+    },
+    {
+      "id": "30098",
+      "action": "clob_order",
+      "ordersPlaced": "NULL",
+      "errors": "NULL",
+      "created": "2026-03-13 04:46:18"
+    },
+    {
+      "id": "30097",
+      "action": "clob_order",
+      "ordersPlaced": "NULL",
+      "errors": "NULL",
+      "created": "2026-03-13 04:46:16"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\taction\tordersPlaced\terrors\tcreated\n30101\tautopilot\t0\t1\t2026-03-13 04:50:11\n30100\tautopilot\t0\t1\t2026-03-13 04:47:11\n30099\tautopilot\t40\t0\t2026-03-13 04:46:18\n30098\tclob_order\tNULL\tNULL\t2026-03-13 04:46:18\n30097\tclob_order\tNULL\tNULL\t2026-03-13 04:46:16\n",
+  "stderr": "",
+  "execution_time_ms": 63
+}

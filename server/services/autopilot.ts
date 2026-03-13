@@ -1,3 +1,15 @@
+import * as fs from "fs";
+import * as path from "path";
+
+// File-based logging that bypasses devserver.log buffering
+const LOG_FILE = path.join(process.cwd(), "autopilot.log");
+function log(msg: string) {
+  const ts = new Date().toISOString();
+  const line = `[${ts}] ${msg}\n`;
+  console.log(msg);
+  try { fs.appendFileSync(LOG_FILE, line); } catch {}
+}
+
 /**
  * Autopilot Engine - DIVERSIFIED STRATEGY
  * 
@@ -101,16 +113,18 @@ function mixByTimeframe<T extends { endDate?: Date | null; hoursToResolution?: n
   const shuffledShort = shuffleArray(shortDated);
   const shuffledLong = shuffleArray(longDated);
 
-  // Interleave: 2 short, 1 long (prioritize short-dated for faster resolution)
+  // Interleave: 4 short, 1 long (planktonXD-style heavy short-dated focus)
   const mixed: T[] = [];
   let si = 0, li = 0;
   while (si < shuffledShort.length || li < shuffledLong.length) {
     if (si < shuffledShort.length) mixed.push(shuffledShort[si++]);
     if (si < shuffledShort.length) mixed.push(shuffledShort[si++]);
+    if (si < shuffledShort.length) mixed.push(shuffledShort[si++]);
+    if (si < shuffledShort.length) mixed.push(shuffledShort[si++]);
     if (li < shuffledLong.length) mixed.push(shuffledLong[li++]);
   }
 
-  console.log(`[Autopilot] Timeframe mix: ${shuffledShort.length} short-dated (<30d), ${shuffledLong.length} long-dated`);
+  log(`[Autopilot] Timeframe mix: ${shuffledShort.length} short-dated (<30d), ${shuffledLong.length} long-dated`);
   return mixed;
 }
 
@@ -192,20 +206,25 @@ function filterByEventGroup(
 
 // ===== Resolution Tracker =====
 async function checkResolutions(): Promise<{ wins: number; losses: number; checked: number }> {
+  log("[Autopilot] Fetching open positions...");
   const openPositions = await db.getPositions("open");
+  log(`[Autopilot] Found ${openPositions.length} open positions to check`);
   let wins = 0, losses = 0, checked = 0;
 
-  for (const pos of openPositions) {
+  for (let i = 0; i < openPositions.length; i++) {
+    const pos = openPositions[i];
     try {
       if (pos.endDate && new Date(pos.endDate) > new Date()) {
+        // Future event — just update price, don't resolve
         try {
           const ob = await analyzeOrderbook(pos.tokenId);
           if (ob.bestBid !== null) {
             await db.updatePositionPrice(pos.id, ob.bestBid);
           }
         } catch {
-          // skip
+          // skip price update errors
         }
+        if ((i + 1) % 10 === 0) log(`[Autopilot] Price updated ${i + 1}/${openPositions.length}`);
         continue;
       }
 
@@ -227,10 +246,11 @@ async function checkResolutions(): Promise<{ wins: number; losses: number; check
 
       await new Promise(r => setTimeout(r, 200));
     } catch (err) {
-      console.error(`[Autopilot] Resolution check error for position ${pos.id}:`, err);
+      log(`[Autopilot] ERROR: Resolution check error for position ${pos.id}: ${err}`);
     }
   }
 
+  log(`[Autopilot] Resolution check complete: ${checked} checked, ${wins} wins, ${losses} losses`);
   return { wins, losses, checked };
 }
 
@@ -290,26 +310,41 @@ async function runCycle(): Promise<AutopilotRunStats> {
     const flatBetSize = Math.min(5, maxPerEvent);
 
     // ===== STEP 1: Check resolutions =====
-    console.log("[Autopilot] Step 1: Checking resolutions...");
+    log("[Autopilot] Step 1: Checking resolutions...");
     const resolutions = await checkResolutions();
     stats.resolutionsChecked = resolutions.checked;
     stats.wins = resolutions.wins;
     stats.losses = resolutions.losses;
 
     // ===== STEP 2: Budget check =====
-    const dashStats = await db.getDashboardStats();
+    log("[Autopilot] Step 2: Budget check...");
+    const dashStatsPromise = db.getDashboardStats();
+    const dashStatsTimeout = new Promise<null>((_, reject) => setTimeout(() => reject(new Error("getDashboardStats timed out after 30s")), 30000));
+    let dashStats: Awaited<ReturnType<typeof db.getDashboardStats>>;
+    try {
+      dashStats = await Promise.race([dashStatsPromise, dashStatsTimeout]) as any;
+    } catch (err: any) {
+      log(`[Autopilot] ERROR: Budget check failed: ${err.message}`);
+      stats.errors.push(`Budget check failed: ${err.message}`);
+      stats.completedAt = new Date();
+      await logCycle(stats);
+      return stats;
+    }
     const totalDeployed = dashStats?.totalCapitalDeployed || 0;
     const remainingCapital = maxTotalCapital - totalDeployed;
     const dailySpent = dashStats?.dailySpent || 0;
     const remainingDailyBudget = dailyBuyBudget - dailySpent;
+    log(`[Autopilot] Budget: deployed=$${totalDeployed.toFixed(2)}/$${maxTotalCapital}, daily=$${dailySpent.toFixed(2)}/$${dailyBuyBudget}, remaining=$${remainingCapital.toFixed(2)}, dailyRemaining=$${remainingDailyBudget.toFixed(2)}`);
 
     if (remainingCapital <= 0) {
+      log(`[Autopilot] STOPPING: Capital limit reached: $${totalDeployed.toFixed(2)} / $${maxTotalCapital}`);
       stats.errors.push(`Capital limit reached: $${totalDeployed.toFixed(2)} / $${maxTotalCapital}`);
       stats.completedAt = new Date();
       await logCycle(stats);
       return stats;
     }
     if (remainingDailyBudget <= 0) {
+      log(`[Autopilot] STOPPING: Daily budget exhausted: $${dailySpent.toFixed(2)} / $${dailyBuyBudget}`);
       stats.errors.push(`Daily budget exhausted: $${dailySpent.toFixed(2)} / $${dailyBuyBudget}`);
       stats.completedAt = new Date();
       await logCycle(stats);
@@ -317,7 +352,7 @@ async function runCycle(): Promise<AutopilotRunStats> {
     }
 
     // ===== STEP 3: Scan for cheap outcomes =====
-    console.log(`[Autopilot] Step 2: Scanning ${scanPages} pages for cheap outcomes...`);
+    log(`[Autopilot] Step 3: Scanning ${scanPages} pages for cheap outcomes...`);
     const cheapOutcomes = await scanForCheapOutcomes(minPrice, maxPrice, minLiquidity, minHours, scanPages);
     stats.marketsScanned = scanPages * 100;
     stats.cheapFound = cheapOutcomes.length;
@@ -348,7 +383,7 @@ async function runCycle(): Promise<AutopilotRunStats> {
     stats.newDiscovered = newCount;
 
     // ===== STEP 4: AI filter (reject impossibles only) =====
-    console.log("[Autopilot] Step 3: AI filtering (reject impossibles only)...");
+    log("[Autopilot] Step 3: AI filtering (reject impossibles only)...");
     const unevaluated = await db.getUnevaluatedEvents(100);
     if (unevaluated.length > 0) {
       const outcomes: ParsedCheapOutcome[] = unevaluated.map(e => ({
@@ -390,7 +425,7 @@ async function runCycle(): Promise<AutopilotRunStats> {
     }
 
     // ===== STEP 5: Select events - DIVERSIFIED =====
-    console.log("[Autopilot] Step 4: Selecting diversified events...");
+    log("[Autopilot] Step 4: Selecting diversified events...");
 
     const approvedEvents = await db.getScannedEvents({
       status: "evaluated",
@@ -415,12 +450,12 @@ async function runCycle(): Promise<AutopilotRunStats> {
     const existingGroupCounts = await getExistingEventGroupCounts();
     const allowedMarketIds = filterByEventGroup(shuffled, existingGroupCounts);
     const deduplicated = shuffled.filter(e => allowedMarketIds.has(e.marketId));
-    console.log(`[Autopilot] After event-group dedup: ${deduplicated.length} candidates (from ${buyable.length}, max ${MAX_POSITIONS_PER_EVENT_GROUP}/group)`);
-    console.log(`[Autopilot] Existing event groups: ${existingGroupCounts.size} groups across ${existingPositions.length} positions`);
+    log(`[Autopilot] After event-group dedup: ${deduplicated.length} candidates (from ${buyable.length}, max ${MAX_POSITIONS_PER_EVENT_GROUP}/group)`);
+    log(`[Autopilot] Existing event groups: ${existingGroupCounts.size} groups across ${existingPositions.length} positions`);
     stats.approved = deduplicated.length;
 
     // ===== STEP 6: Place orders with category-aware selection =====
-    console.log(`[Autopilot] Step 5: Placing diversified orders...`);
+    log(`[Autopilot] Step 5: Placing diversified orders...`);
     const categoryUsage = await getCategoryUsage();
     let currentDailySpent = dailySpent;
     let currentTotalDeployed = totalDeployed;
@@ -438,7 +473,7 @@ async function runCycle(): Promise<AutopilotRunStats> {
 
       const category = event.category || "other";
       if (!canBuyInCategory(category, flatBetSize, categoryUsage, currentTotalDeployed, maxCategoryPercent)) {
-        console.log(`[Autopilot] Skipping ${category} - cap reached (${maxCategoryPercent}%)`);
+        log(`[Autopilot] Skipping ${category} - cap reached (${maxCategoryPercent}%)`);
         continue;
       }
 
@@ -534,7 +569,7 @@ async function runCycle(): Promise<AutopilotRunStats> {
         await new Promise(r => setTimeout(r, 300));
       } catch (err: any) {
         stats.errors.push(`Order error [${category}]: ${err.message}`);
-        console.error(`[Autopilot] Order error:`, err);
+        log(`[Autopilot] ERROR: Order error: ${err}`);
       }
     }
 
@@ -542,7 +577,7 @@ async function runCycle(): Promise<AutopilotRunStats> {
     stats.categoriesUsed = cycleCategories.size;
 
     // ===== STEP 7: Check fill status of existing orders =====
-    console.log("[Autopilot] Step 6: Checking order fill status...");
+    log("[Autopilot] Step 6: Checking order fill status...");
     try {
       const placedOrderIds = await db.getPlacedOrderIds();
       if (placedOrderIds.length > 0) {
@@ -551,10 +586,10 @@ async function runCycle(): Promise<AutopilotRunStats> {
         stats.fillsFilled = fillStats.filled;
         stats.fillsCancelled = fillStats.cancelled;
         stats.fillsOpen = fillStats.open;
-        console.log(`[Autopilot] Fill check: ${fillStats.checked} checked, ${fillStats.filled} filled, ${fillStats.partial} partial, ${fillStats.cancelled} cancelled, ${fillStats.open} open`);
+        log(`[Autopilot] Fill check: ${fillStats.checked} checked, ${fillStats.filled} filled, ${fillStats.partial} partial, ${fillStats.cancelled} cancelled, ${fillStats.open} open`);
       }
     } catch (fillErr: any) {
-      console.error("[Autopilot] Fill check error:", fillErr.message);
+      log(`[Autopilot] ERROR: Fill check error: ${fillErr.message}`);
     }
 
     stats.completedAt = new Date();
@@ -602,12 +637,12 @@ async function logCycle(stats: AutopilotRunStats) {
 
 export async function startAutopilot(intervalHours = 2): Promise<void> {
   if (isRunning) {
-    console.log("[Autopilot] Already running");
+    log("[Autopilot] Already running");
     return;
   }
 
   isRunning = true;
-  console.log(`[Autopilot] Starting DIVERSIFIED strategy with ${intervalHours}h interval`);
+  log(`[Autopilot] Starting DIVERSIFIED strategy with ${intervalHours}h interval`);
 
   const runAndSchedule = async () => {
     if (!isRunning) return;
@@ -616,7 +651,7 @@ export async function startAutopilot(intervalHours = 2): Promise<void> {
     try {
       lastRunStats = await runCycle();
     } catch (err) {
-      console.error("[Autopilot] Unhandled cycle error:", err);
+      log(`[Autopilot] ERROR: Unhandled cycle error: ${err}`);
     }
 
     if (isRunning) {
@@ -636,7 +671,7 @@ export function stopAutopilot(): void {
     loopTimer = null;
   }
   nextRunAt = null;
-  console.log("[Autopilot] Stopped");
+  log("[Autopilot] Stopped");
 }
 
 export async function runSingleCycle(): Promise<AutopilotRunStats> {

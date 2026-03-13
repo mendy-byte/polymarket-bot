@@ -14,7 +14,7 @@ import { ClobClient, Side, OrderType, SignatureType } from "@polymarket/clob-cli
 import type { TickSize as ClobTickSize, CreateOrderOptions } from "@polymarket/clob-client";
 import { Wallet } from "ethers";
 import * as db from "../db";
-import { initializeProxy, getProxyStatus } from "./proxySetup";
+import { initializeConnection, getProxyStatus, disableProxy } from "./proxySetup";
 
 const CLOB_HOST = "https://clob.polymarket.com";
 const CHAIN_ID = 137; // Polygon mainnet
@@ -45,11 +45,15 @@ export interface OrderResult {
  */
 export async function initializeClobClient(): Promise<{ success: boolean; error?: string }> {
   try {
-    // Initialize SOCKS5 proxy for CLOB requests (routes through Amsterdam)
+    // Smart connection: try direct first, fall back to proxy
     const proxyStatus = getProxyStatus();
-    if (!proxyStatus.active) {
-      console.log("[CLOB] Initializing SOCKS5 proxy for CLOB API access...");
-      initializeProxy();
+    if (proxyStatus.mode === "none") {
+      console.log("[CLOB] Initializing connection (direct first, proxy fallback)...");
+      const connMode = await initializeConnection();
+      if (connMode === "failed") {
+        initError = "Both direct and proxy connections to CLOB API failed";
+        return { success: false, error: initError };
+      }
     }
 
     const configRows = await db.getAllConfig();
@@ -142,12 +146,24 @@ export async function initializeClobClient(): Promise<{ success: boolean; error?
 
 /**
  * Get the initialized CLOB client, or try to initialize it.
+ * Includes retry with connection mode reset on failure.
  */
 async function getClient(): Promise<ClobClient> {
   if (!clobClient || !isInitialized) {
-    const result = await initializeClobClient();
+    // First attempt
+    let result = await initializeClobClient();
     if (!result.success || !clobClient) {
-      throw new Error(`CLOB client not available: ${result.error || "Unknown error"}`);
+      // Reset connection mode and retry (will try alternate path)
+      console.log("[CLOB] First init attempt failed, resetting connection and retrying...");
+      isInitialized = false;
+      clobClient = null;
+      // Force re-detection of connection mode
+      const { initializeConnection } = await import("./proxySetup");
+      await initializeConnection();
+      result = await initializeClobClient();
+      if (!result.success || !clobClient) {
+        throw new Error(`CLOB client not available after retry: ${result.error || "Unknown error"}`);
+      }
     }
   }
   return clobClient;

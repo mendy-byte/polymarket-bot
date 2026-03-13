@@ -1,0 +1,8 @@
+{
+  "query": "SELECT COUNT(*) as total_orders, MAX(placed_at) as latest_order FROM orders;\nSELECT COUNT(*) as total_positions FROM positions;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3qjSsefs24zghQG.d5f38dec7f6c --database YZ9v9D6zNEEycYVBBKJ8og --execute SELECT COUNT(*) as total_orders, MAX(placed_at) as latest_order FROM orders;\nSELECT COUNT(*) as total_positions FROM positions;",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1054 (42S22) at line 1: Unknown column 'placed_at' in ''"
+  ]
+}

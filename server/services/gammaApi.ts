@@ -66,13 +66,22 @@ export interface OrderbookData {
 }
 
 async function fetchJson<T>(url: string): Promise<T> {
-  const resp = await fetch(url, {
-    headers: { "User-Agent": "PolymarketBot/1.0" },
-  });
-  if (!resp.ok) {
-    throw new Error(`Gamma API error: ${resp.status} ${resp.statusText} for ${url}`);
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 15000); // 15s timeout
+  try {
+    const resp = await fetch(url, {
+      headers: { "User-Agent": "PolymarketBot/1.0" },
+      signal: controller.signal,
+      // @ts-ignore - ensure we bypass any global proxy agent
+      dispatcher: undefined,
+    });
+    if (!resp.ok) {
+      throw new Error(`Gamma API error: ${resp.status} ${resp.statusText} for ${url}`);
+    }
+    return resp.json() as Promise<T>;
+  } finally {
+    clearTimeout(timeout);
   }
-  return resp.json() as Promise<T>;
 }
 
 /** Fetch all active events with their markets, paginated */
@@ -204,8 +213,13 @@ export async function scanForCheapOutcomes(
       }
     }
 
+    // Progress logging every 10 pages
+    if ((page + 1) % 10 === 0 || page === 0) {
+      console.log(`[Scanner] Page ${page + 1}/${maxPages}: ${results.length} cheap outcomes found so far`);
+    }
+
     // Rate limiting
-    await new Promise(r => setTimeout(r, 300));
+    await new Promise(r => setTimeout(r, 200));
   }
 
   // Sort by liquidity descending, then by price ascending

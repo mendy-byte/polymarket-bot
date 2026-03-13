@@ -1,0 +1,26 @@
+{
+  "query": "SELECT * FROM orders LIMIT 1;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3qjSsefs24zghQG.d5f38dec7f6c --database YZ9v9D6zNEEycYVBBKJ8og --execute SELECT * FROM orders LIMIT 1;",
+  "rows": [
+    {
+      "id": "1",
+      "scannedEventId": "3",
+      "orderId": "0x9e4f8945595d71c28df9a72ffa23324e15d7526e60834bcbb700ae2a4064418d",
+      "marketId": "654414",
+      "tokenId": "114350083305515876605975857295292847572608542141507135338338719165921048222327",
+      "side": "BUY",
+      "price": "0.006000",
+      "size": "1666.000000",
+      "amountUsd": "9.996000",
+      "status": "cancelled",
+      "errorMessage": "NULL",
+      "filledAt": "NULL",
+      "createdAt": "2026-03-13 02:14:05",
+      "updatedAt": "2026-03-13 03:52:01"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tscannedEventId\torderId\tmarketId\ttokenId\tside\tprice\tsize\tamountUsd\tstatus\terrorMessage\tfilledAt\tcreatedAt\tupdatedAt\n1\t3\t0x9e4f8945595d71c28df9a72ffa23324e15d7526e60834bcbb700ae2a4064418d\t654414\t114350083305515876605975857295292847572608542141507135338338719165921048222327\tBUY\t0.006000\t1666.000000\t9.996000\tcancelled\tNULL\tNULL\t2026-03-13 02:14:05\t2026-03-13 03:52:01\n",
+  "stderr": "",
+  "execution_time_ms": 54
+}

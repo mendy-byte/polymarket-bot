@@ -1,0 +1,90 @@
+{
+  "query": "SELECT id, status, price, size, amountUsd, createdAt FROM orders ORDER BY id DESC LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3qjSsefs24zghQG.d5f38dec7f6c --database YZ9v9D6zNEEycYVBBKJ8og --execute SELECT id, status, price, size, amountUsd, createdAt FROM orders ORDER BY id DESC LIMIT 10;",
+  "rows": [
+    {
+      "id": "77",
+      "status": "placed",
+      "price": "0.006000",
+      "size": "833.333333",
+      "amountUsd": "5.000000",
+      "createdAt": "2026-03-13 04:46:17"
+    },
+    {
+      "id": "76",
+      "status": "placed",
+      "price": "0.012000",
+      "size": "416.666667",
+      "amountUsd": "5.000000",
+      "createdAt": "2026-03-13 04:46:16"
+    },
+    {
+      "id": "75",
+      "status": "placed",
+      "price": "0.016000",
+      "size": "312.500000",
+      "amountUsd": "5.000000",
+      "createdAt": "2026-03-13 04:46:15"
+    },
+    {
+      "id": "74",
+      "status": "placed",
+      "price": "0.010000",
+      "size": "500.000000",
+      "amountUsd": "5.000000",
+      "createdAt": "2026-03-13 04:46:13"
+    },
+    {
+      "id": "73",
+      "status": "placed",
+      "price": "0.003000",
+      "size": "1666.666667",
+      "amountUsd": "5.000000",
+      "createdAt": "2026-03-13 04:46:12"
+    },
+    {
+      "id": "72",
+      "status": "placed",
+      "price": "0.005000",
+      "size": "1000.000000",
+      "amountUsd": "5.000000",
+      "createdAt": "2026-03-13 04:46:11"
+    },
+    {
+      "id": "71",
+      "status": "placed",
+      "price": "0.021000",
+      "size": "238.095238",
+      "amountUsd": "5.000000",
+      "createdAt": "2026-03-13 04:46:10"
+    },
+    {
+      "id": "70",
+      "status": "placed",
+      "price": "0.009000",
+      "size": "555.555556",
+      "amountUsd": "5.000000",
+      "createdAt": "2026-03-13 04:46:08"
+    },
+    {
+      "id": "69",
+      "status": "placed",
+      "price": "0.019000",
+      "size": "263.157895",
+      "amountUsd": "5.000000",
+      "createdAt": "2026-03-13 04:46:07"
+    },
+    {
+      "id": "68",
+      "status": "placed",
+      "price": "0.004000",
+      "size": "1250.000000",
+      "amountUsd": "5.000000",
+      "createdAt": "2026-03-13 04:46:06"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tstatus\tprice\tsize\tamountUsd\tcreatedAt\n77\tplaced\t0.006000\t833.333333\t5.000000\t2026-03-13 04:46:17\n76\tplaced\t0.012000\t416.666667\t5.000000\t2026-03-13 04:46:16\n75\tplaced\t0.016000\t312.500000\t5.000000\t2026-03-13 04:46:15\n74\tplaced\t0.010000\t500.000000\t5.000000\t2026-03-13 04:46:13\n73\tplaced\t0.003000\t1666.666667\t5.000000\t2026-03-13 04:46:12\n72\tplaced\t0.005000\t1000.000000\t5.000000\t2026-03-13 04:46:11\n71\tplaced\t0.021000\t238.095238\t5.000000\t2026-03-13 04:46:10\n70\tplaced\t0.009000\t555.555556\t5.000000\t2026-03-13 04:46:08\n69\tplaced\t0.019000\t263.157895\t5.000000\t2026-03-13 04:46:07\n68\tplaced\t0.004000\t1250.000000\t5.000000\t2026-03-13 04:46:06\n",
+  "stderr": "",
+  "execution_time_ms": 59
+}
