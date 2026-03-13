@@ -275,6 +275,130 @@ export async function getRecentLogs(limit = 50) {
   return db.select().from(scanLogs).orderBy(desc(scanLogs.createdAt)).limit(limit);
 }
 
+// ===== Resolved Positions Summary =====
+export async function getResolvedPositionsSummary() {
+  const db = await getDb();
+  if (!db) return null;
+
+  const allPositions = await db.select().from(positions);
+  const resolved = allPositions.filter(p => p.status === "resolved_win" || p.status === "resolved_loss");
+  const wins = resolved.filter(p => p.status === "resolved_win");
+  const losses = resolved.filter(p => p.status === "resolved_loss");
+
+  const totalCostResolved = resolved.reduce((s, p) => s + parseFloat(p.costBasis), 0);
+  const totalPayout = resolved.reduce((s, p) => s + parseFloat(p.resolutionPayout || "0"), 0);
+  const totalPnl = resolved.reduce((s, p) => s + parseFloat(p.pnl || "0"), 0);
+  const winPnl = wins.reduce((s, p) => s + parseFloat(p.pnl || "0"), 0);
+  const lossPnl = losses.reduce((s, p) => s + parseFloat(p.pnl || "0"), 0);
+
+  // Category breakdown for resolved positions
+  const categoryMap = new Map<string, { wins: number; losses: number; costBasis: number; pnl: number; payout: number }>();
+  for (const p of resolved) {
+    const cat = p.category || "other";
+    const existing = categoryMap.get(cat) || { wins: 0, losses: 0, costBasis: 0, pnl: 0, payout: 0 };
+    if (p.status === "resolved_win") existing.wins++;
+    else existing.losses++;
+    existing.costBasis += parseFloat(p.costBasis);
+    existing.pnl += parseFloat(p.pnl || "0");
+    existing.payout += parseFloat(p.resolutionPayout || "0");
+    categoryMap.set(cat, existing);
+  }
+
+  // Monthly breakdown for resolved positions (by resolvedAt date)
+  const monthlyMap = new Map<string, { wins: number; losses: number; costBasis: number; pnl: number; payout: number }>();
+  for (const p of resolved) {
+    const d = p.resolvedAt || p.updatedAt;
+    const monthKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+    const existing = monthlyMap.get(monthKey) || { wins: 0, losses: 0, costBasis: 0, pnl: 0, payout: 0 };
+    if (p.status === "resolved_win") existing.wins++;
+    else existing.losses++;
+    existing.costBasis += parseFloat(p.costBasis);
+    existing.pnl += parseFloat(p.pnl || "0");
+    existing.payout += parseFloat(p.resolutionPayout || "0");
+    monthlyMap.set(monthKey, existing);
+  }
+
+  // Best and worst individual positions
+  const bestWin = wins.length > 0
+    ? wins.reduce((best, p) => parseFloat(p.pnl || "0") > parseFloat(best.pnl || "0") ? p : best)
+    : null;
+  const worstLoss = losses.length > 0
+    ? losses.reduce((worst, p) => parseFloat(p.pnl || "0") < parseFloat(worst.pnl || "0") ? p : worst)
+    : null;
+
+  // Open positions stats for context
+  const openPositions = allPositions.filter(p => p.status === "open");
+  const totalOpenCost = openPositions.reduce((s, p) => s + parseFloat(p.costBasis), 0);
+
+  return {
+    totalResolved: resolved.length,
+    totalWins: wins.length,
+    totalLosses: losses.length,
+    winRate: resolved.length > 0 ? (wins.length / resolved.length) * 100 : 0,
+    totalCostResolved,
+    totalPayout,
+    totalPnl,
+    totalPnlPercent: totalCostResolved > 0 ? (totalPnl / totalCostResolved) * 100 : 0,
+    winPnl,
+    lossPnl,
+    avgWinPnl: wins.length > 0 ? winPnl / wins.length : 0,
+    avgLossPnl: losses.length > 0 ? lossPnl / losses.length : 0,
+    bestWin: bestWin ? {
+      question: bestWin.question,
+      outcome: bestWin.outcome,
+      category: bestWin.category,
+      entryPrice: bestWin.entryPrice,
+      pnl: bestWin.pnl,
+      pnlPercent: bestWin.pnlPercent,
+      resolvedAt: bestWin.resolvedAt,
+    } : null,
+    worstLoss: worstLoss ? {
+      question: worstLoss.question,
+      outcome: worstLoss.outcome,
+      category: worstLoss.category,
+      entryPrice: worstLoss.entryPrice,
+      pnl: worstLoss.pnl,
+      pnlPercent: worstLoss.pnlPercent,
+      resolvedAt: worstLoss.resolvedAt,
+    } : null,
+    openPositionsCount: openPositions.length,
+    totalOpenCost,
+    // Breakdowns
+    categoryBreakdown: Array.from(categoryMap.entries()).map(([category, data]) => ({
+      category,
+      ...data,
+      winRate: (data.wins + data.losses) > 0 ? (data.wins / (data.wins + data.losses)) * 100 : 0,
+      roi: data.costBasis > 0 ? (data.pnl / data.costBasis) * 100 : 0,
+    })).sort((a, b) => b.pnl - a.pnl),
+    monthlyBreakdown: Array.from(monthlyMap.entries()).map(([month, data]) => ({
+      month,
+      ...data,
+      winRate: (data.wins + data.losses) > 0 ? (data.wins / (data.wins + data.losses)) * 100 : 0,
+      roi: data.costBasis > 0 ? (data.pnl / data.costBasis) * 100 : 0,
+    })).sort((a, b) => a.month.localeCompare(b.month)),
+    // Individual resolved positions for the history table
+    resolvedPositions: resolved.map(p => ({
+      id: p.id,
+      question: p.question,
+      outcome: p.outcome,
+      category: p.category,
+      entryPrice: p.entryPrice,
+      shares: p.shares,
+      costBasis: p.costBasis,
+      resolutionPayout: p.resolutionPayout,
+      pnl: p.pnl,
+      pnlPercent: p.pnlPercent,
+      status: p.status,
+      resolvedAt: p.resolvedAt,
+      createdAt: p.createdAt,
+    })).sort((a, b) => {
+      const aDate = a.resolvedAt || a.createdAt;
+      const bDate = b.resolvedAt || b.createdAt;
+      return bDate.getTime() - aDate.getTime();
+    }),
+  };
+}
+
 // ===== Dashboard Stats =====
 export async function getDashboardStats() {
   const db = await getDb();

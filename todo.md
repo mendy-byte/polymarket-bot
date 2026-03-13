@@ -67,3 +67,4 @@
 - [ ] Make CLOB init retry with fallback so bot works seamlessly regardless of proxy status
 - [ ] Set up new SOCKS5 proxy server for Polymarket trading (old one at 152.42.139.184 is down)
 - [x] Adjust short:long event ratio from 2:1 to 4:1 to match planktonXD's heavy short-dated focus
+- [x] Add resolved positions summary view to Portfolio page (win/loss history, P&L by category, resolution timeline)

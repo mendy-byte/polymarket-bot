@@ -195,6 +195,9 @@ export const appRouter = router({
     }).optional()).query(async ({ input }) => {
       return db.getOrders(input?.status);
     }),
+    resolvedSummary: protectedProcedure.query(async () => {
+      return db.getResolvedPositionsSummary();
+    }),
     placeOrder: protectedProcedure.input(z.object({
       scannedEventId: z.number(),
       amountUsd: z.number().min(0.05).max(25),
