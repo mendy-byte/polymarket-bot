@@ -423,9 +423,12 @@ export async function getDashboardStats() {
     categoryMap.set(cat, (categoryMap.get(cat) || 0) + parseFloat(p.costBasis));
   }
 
-  // Today's spending
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  // Today's spending (EST timezone)
+  const nowEst = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/New_York' }));
+  nowEst.setHours(0, 0, 0, 0);
+  // Convert EST midnight back to UTC for DB query
+  const estOffsetMs = new Date().getTime() - new Date(new Date().toLocaleString('en-US', { timeZone: 'America/New_York' })).getTime();
+  const today = new Date(nowEst.getTime() + estOffsetMs);
   const todayOrders = await db.select().from(orders).where(gte(orders.createdAt, today));
   const dailySpent = todayOrders.reduce((s, o) => s + parseFloat(o.amountUsd), 0);
 
