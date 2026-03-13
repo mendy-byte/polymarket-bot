@@ -8,6 +8,8 @@ import * as db from "./db";
 import { scanForCheapOutcomes, analyzeOrderbook } from "./services/gammaApi";
 import { evaluateBatch, evaluateSingle } from "./services/aiEvaluator";
 import { startAutopilot, stopAutopilot, runSingleCycle, getAutopilotStatus } from "./services/autopilot";
+import { initializeClobClient, getClobStatus, placeLimitOrder, cancelAllOrders, getOpenOrders, shutdownClob } from "./services/clobTrader";
+import type { TickSize as ClobTickSize } from "@polymarket/clob-client";
 import type { ParsedCheapOutcome } from "./services/gammaApi";
 
 export const appRouter = router({
@@ -272,11 +274,28 @@ export const appRouter = router({
         };
       }
 
-      // With wallet configured, attempt CLOB placement
+      // With wallet configured, attempt live CLOB placement
       try {
-        // CLOB order placement would go here
-        // For now, mark as placed and create position
-        await db.updateOrderStatus(orderId!, "placed");
+        const clobStatus = getClobStatus();
+        if (!clobStatus.initialized) {
+          await initializeClobClient();
+        }
+
+        const tickSize = (event.tickSize || "0.01") as ClobTickSize;
+        const clobResult = await placeLimitOrder(
+          event.tokenId,
+          price,
+          shares,
+          tickSize,
+          event.negRisk || false,
+        );
+
+        if (!clobResult.success) {
+          await db.updateOrderStatus(orderId!, "failed", `CLOB: ${clobResult.errorMsg}`);
+          throw new Error(`CLOB order failed: ${clobResult.errorMsg}`);
+        }
+
+        await db.updateOrderStatus(orderId!, "placed", `CLOB order: ${clobResult.orderId}`);
         await db.createPosition({
           scannedEventId: event.id,
           marketId: event.marketId,
@@ -460,12 +479,16 @@ export const appRouter = router({
     status: protectedProcedure.query(async () => {
       const configRows = await db.getAllConfig();
       const configMap = new Map(configRows.map(c => [c.key, c.value]));
+      const clobStatus = getClobStatus();
       return {
-        configured: !!configMap.get("walletPrivateKey"),
-        address: configMap.get("walletAddress") || "",
+        configured: !!(configMap.get("walletPrivateKey") || process.env.POLYGON_PRIVATE_KEY),
+        address: configMap.get("walletAddress") || process.env.POLYGON_WALLET_ADDRESS || "",
         clobApiKey: configMap.get("clobApiKey") ? "***configured***" : "",
         clobApiSecret: configMap.get("clobApiSecret") ? "***configured***" : "",
         clobPassphrase: configMap.get("clobPassphrase") ? "***configured***" : "",
+        clobInitialized: clobStatus.initialized,
+        clobError: clobStatus.error,
+        heartbeatActive: clobStatus.heartbeatActive,
       };
     }),
     configure: protectedProcedure.input(z.object({
@@ -482,6 +505,35 @@ export const appRouter = router({
       if (input.clobPassphrase) await db.setConfig("clobPassphrase", input.clobPassphrase, "CLOB API passphrase");
       await db.createScanLog({ action: "wallet_config", details: "Wallet configuration updated" });
       return { success: true };
+    }),
+    deriveCreds: protectedProcedure.mutation(async () => {
+      const result = await initializeClobClient();
+      if (!result.success) {
+        throw new Error(`Failed to derive CLOB credentials: ${result.error}`);
+      }
+      const configRows = await db.getAllConfig();
+      const configMap = new Map(configRows.map(c => [c.key, c.value]));
+      return {
+        success: true,
+        address: configMap.get("walletAddress") || "",
+        clobApiKey: configMap.get("clobApiKey") ? "***derived***" : "",
+        clobInitialized: true,
+      };
+    }),
+    disconnect: protectedProcedure.mutation(async () => {
+      shutdownClob();
+      await db.createScanLog({ action: "wallet_disconnect", details: "CLOB client disconnected" });
+      return { success: true };
+    }),
+    cancelAll: protectedProcedure.mutation(async () => {
+      const result = await cancelAllOrders();
+      if (result) {
+        await db.createScanLog({ action: "cancel_all", details: "All open CLOB orders cancelled" });
+      }
+      return { success: result };
+    }),
+    openOrders: protectedProcedure.query(async () => {
+      return getOpenOrders();
     }),
   }),
 });

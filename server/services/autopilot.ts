@@ -15,6 +15,8 @@
 
 import { scanForCheapOutcomes, analyzeOrderbook } from "./gammaApi";
 import { evaluateBatch } from "./aiEvaluator";
+import { placeLimitOrder, initializeClobClient, getClobStatus } from "./clobTrader";
+import type { TickSize as ClobTickSize } from "@polymarket/clob-client";
 import type { ParsedCheapOutcome } from "./gammaApi";
 import * as db from "../db";
 import { DEFAULT_RISK_CONFIG } from "@shared/botTypes";
@@ -394,13 +396,41 @@ async function runCycle(): Promise<AutopilotRunStats> {
         });
 
         // Check if wallet is configured for live trading
-        const walletKey = configMap.get("walletPrivateKey");
+        const walletKey = configMap.get("walletPrivateKey") || process.env.POLYGON_PRIVATE_KEY;
         if (!walletKey) {
           // Simulated mode
           await db.updateOrderStatus(orderId!, "pending", "Simulated - wallet not configured");
         } else {
-          // TODO: Actual CLOB order placement
-          await db.updateOrderStatus(orderId!, "placed");
+          // Live CLOB order placement
+          try {
+            const clobStatus = getClobStatus();
+            if (!clobStatus.initialized) {
+              await initializeClobClient();
+            }
+
+            const tickSize = (event.tickSize || "0.01") as ClobTickSize;
+            const result = await placeLimitOrder(
+              event.tokenId!,
+              price,
+              shares,
+              tickSize,
+              event.negRisk || false,
+            );
+
+            if (result.success) {
+              await db.updateOrderStatus(orderId!, "placed", `CLOB order: ${result.orderId}`);
+              await db.createScanLog({
+                action: "clob_order",
+                details: `Live order placed: ${event.question.slice(0, 60)}... @ $${price.toFixed(4)} x ${shares.toFixed(1)} shares ($${betSize})`,
+              });
+            } else {
+              await db.updateOrderStatus(orderId!, "failed", `CLOB error: ${result.errorMsg}`);
+              stats.errors.push(`CLOB order failed for ${event.marketId}: ${result.errorMsg}`);
+            }
+          } catch (clobErr: any) {
+            await db.updateOrderStatus(orderId!, "failed", `CLOB exception: ${clobErr.message}`);
+            stats.errors.push(`CLOB exception for ${event.marketId}: ${clobErr.message}`);
+          }
         }
 
         // Create position

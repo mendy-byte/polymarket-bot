@@ -19,10 +19,19 @@
 - [x] Dashboard: Settings page (wallet config, bot parameters)
 - [x] Dashboard: Expected Value calculator
 - [x] Dashboard: Activity Log page
-- [x] Vitest tests for core backend logic (38 passing)
+- [x] Vitest tests for core backend logic (57 passing)
 - [x] Autonomous scan-evaluate-buy loop (background job every 4-6 hours)
 - [x] Smart bet sizing ($5-$25 based on AI confidence score)
 - [x] Bulk order pipeline (batch 50-100+ orders per run)
 - [x] Auto-resolution tracker (check resolved markets, update P&L)
 - [x] Autopilot controls on dashboard (enable/disable, interval, status)
 - [x] Loop status display (last run, next run, orders placed, events found)
+- [x] Set up wallet secrets (POLYGON_WALLET_ADDRESS, POLYGON_PRIVATE_KEY) via secure env vars
+- [x] Build CLOB credential derivation (API key/secret/passphrase from wallet signature)
+- [x] Integrate live CLOB order execution into the order engine
+- [x] CLOB trading service with @polymarket/clob-client SDK
+- [x] One-click credential derivation from wallet private key
+- [x] Heartbeat management (5s interval to keep orders alive)
+- [x] Batch order support (up to 15 per batch)
+- [x] Cancel all orders / disconnect CLOB controls
+- [x] Updated Settings page with connection status and quick actions
