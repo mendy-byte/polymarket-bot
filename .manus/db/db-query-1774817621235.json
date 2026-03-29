@@ -1,0 +1,9 @@
+{
+  "query": "UPDATE bot_config SET value = '1200', description = 'Max total capital ($1200 deployment)' WHERE `key` = 'maxTotalCapital';\nINSERT INTO bot_config (`key`, value, description) VALUES ('maxDrawdownPercent', '40', 'Hard drawdown stop at -40%') ON DUPLICATE KEY UPDATE value = '40', description = 'Hard drawdown stop at -40%';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3qjSsefs24zghQG.d5f38dec7f6c --database YZ9v9D6zNEEycYVBBKJ8og --execute UPDATE bot_config SET value = '1200', description = 'Max total capital ($1200 deployment)' WHERE `key` = 'maxTotalCapital';\nINSERT INTO bot_config (`key`, value, description) VALUES ('maxDrawdownPercent', '40', 'Hard drawdown stop at -40%') ON DUPLICATE KEY UPDATE value = '40', description = 'Hard drawdown stop at -40%';",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 59
+}

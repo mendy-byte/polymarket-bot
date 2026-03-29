@@ -117,11 +117,39 @@ function enableProxy(socksUrl: string): boolean {
  * If proxy fails all retries, fall back to direct (read-only mode — scanning works, trading won't).
  */
 export async function initializeConnection(): Promise<"proxy" | "direct" | "failed"> {
-  const socksUrl = process.env.SOCKS5_PROXY_URL || "socks5://polybot:pr0xyS3cure2026@165.227.132.17:1080";
+  const socksUrl = process.env.SOCKS5_PROXY_URL || null; // null = try direct first (Frankfurt usually works direct)
   const MAX_RETRIES = 3;
   const RETRY_DELAYS = [2000, 5000, 10000]; // 2s, 5s, 10s
 
-  // Try proxy with retries (required for trading)
+  // Frankfurt optimization: try direct connection first
+  if (!socksUrl) {
+    console.log("[Connection] No proxy configured — trying direct connection (Frankfurt)...");
+    try {
+      const directResp = await axios.get(`${CLOB_HOST}/time`, { timeout: 10000, proxy: false });
+      if (directResp.status === 200) {
+        disableProxy();
+        connectionMode = "direct";
+        console.log("[Connection] Direct connection works — trading via Frankfurt IP");
+        return "direct";
+      }
+    } catch {
+      console.log("[Connection] Direct connection failed — will try proxy fallback");
+    }
+    // Direct failed, try default proxy as fallback
+    const fallbackProxy = "socks5://polybot:pr0xyS3cure2026@165.227.132.17:1080";
+    const proxyWorks = await testProxyConnection(fallbackProxy);
+    if (proxyWorks) {
+      enableProxy(fallbackProxy);
+      console.log("[Connection] Proxy fallback connection established — trading enabled");
+      return "proxy";
+    }
+    console.warn("[Connection] ⚠️ Both direct and proxy failed — scanning only");
+    disableProxy();
+    connectionMode = "direct";
+    return "direct";
+  }
+
+  // Explicit proxy configured — try with retries (required for trading)
   for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
     console.log(`[Connection] Testing proxy connection (attempt ${attempt + 1}/${MAX_RETRIES})...`);
     const proxyWorks = await testProxyConnection(socksUrl);
@@ -183,7 +211,7 @@ export function canTrade(): boolean {
 export function getProxyStatus(): { active: boolean; url: string; mode: string } {
   return {
     active: isProxyActive,
-    url: process.env.SOCKS5_PROXY_URL || "socks5://polybot:pr0xyS3cure2026@165.227.132.17:1080",
+    url: process.env.SOCKS5_PROXY_URL || "socks5://polybot:pr0xyS3cure2026@165.227.132.17:1080 (fallback)",
     mode: connectionMode,
   };
 }

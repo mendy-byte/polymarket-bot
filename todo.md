@@ -88,3 +88,8 @@
 - [x] Migrate SOCKS5 proxy from Amsterdam (152.42.139.184) to Frankfurt (165.227.132.17)
 - [x] Create new Frankfurt droplet via DigitalOcean API with auto-setup user-data script
 - [x] Destroy old Amsterdam droplet
+- [x] Update DEFAULT_RISK_CONFIG to $1200 capital, $200 daily budget, add maxDrawdownPercent
+- [x] Add drawdown protection in autopilot runCycle() with auto-pause at -40%
+- [x] Create Telegram alert service (server/services/telegram.ts)
+- [x] Optimize proxySetup.ts for Frankfurt (direct-first, proxy as backup)
+- [x] Add Risk Gauge box to dashboard overview page

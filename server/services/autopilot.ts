@@ -42,6 +42,7 @@ import type { TickSize as ClobTickSize } from "@polymarket/clob-client";
 import type { ParsedCheapOutcome } from "./gammaApi";
 import * as db from "../db";
 import { DEFAULT_RISK_CONFIG } from "@shared/botTypes";
+import { sendTelegramAlert } from "./telegram";
 
 // ===== Autopilot State =====
 let isRunning = false;
@@ -358,6 +359,19 @@ async function runCycle(): Promise<AutopilotRunStats> {
     const dailySpent = dashStats?.dailySpent || 0;
     const remainingDailyBudget = dailyBuyBudget - dailySpent;
     log(`[Autopilot] Budget: deployed=$${totalDeployed.toFixed(2)}/$${maxTotalCapital}, daily=$${dailySpent.toFixed(2)}/$${dailyBuyBudget}, remaining=$${remainingCapital.toFixed(2)}, dailyRemaining=$${remainingDailyBudget.toFixed(2)}`);
+
+    // ===== DRAWDOWN PROTECTION =====
+    const pnlPercent = dashStats?.totalPnlPercent || 0;
+    const maxDrawdown = parseFloat(configMap.get("maxDrawdownPercent") || String(DEFAULT_RISK_CONFIG.maxDrawdownPercent));
+    if (pnlPercent <= -maxDrawdown) {
+      log(`🚨 HARD DRAWDOWN HIT (${pnlPercent.toFixed(1)}% <= -${maxDrawdown}%). Auto-pausing bot.`);
+      await db.setConfig("killSwitch", "true", `Auto-paused due to ${pnlPercent.toFixed(1)}% drawdown`);
+      await sendTelegramAlert(`🚨 BOT AUTO-PAUSED: ${pnlPercent.toFixed(1)}% drawdown hit on $${maxTotalCapital} capital`);
+      stats.errors.push(`Hard drawdown hit: ${pnlPercent.toFixed(1)}%`);
+      stats.completedAt = new Date();
+      await logCycle(stats);
+      return stats;
+    }
 
     if (remainingCapital <= 0) {
       log(`[Autopilot] STOPPING: Capital limit reached: $${totalDeployed.toFixed(2)} / $${maxTotalCapital}`);
@@ -686,6 +700,7 @@ export async function startAutopilot(intervalHours = 2): Promise<void> {
     }
   };
 
+  await sendTelegramAlert(`✅ Bot started on Frankfurt | Capital: $${DEFAULT_RISK_CONFIG.maxTotalCapital} | Daily budget: $${DEFAULT_RISK_CONFIG.dailyBuyBudget}`);
   await runAndSchedule();
 }
 

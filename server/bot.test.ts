@@ -118,7 +118,7 @@ describe("risk.config", () => {
     const caller = appRouter.createCaller(ctx);
     const result = await caller.risk.config();
     expect(result).toBeDefined();
-    expect(result.maxTotalCapital).toBe(2000);
+    expect(result.maxTotalCapital).toBe(1200);
     expect(typeof result.maxPerEvent).toBe("number"); // Default $5, but may be modified by updateConfig test
     expect(typeof result.maxCategoryPercent).toBe("number"); // Default 15%
     expect(typeof result.dailyBuyBudget).toBe("number"); // Default 200, may be modified

@@ -133,8 +133,100 @@ function OverviewContent() {
     categoryBreakdown: (stats as any)?.categoryBreakdown ?? [],
   };
 
+  const killSwitchMutation = trpc.risk.killSwitch.useMutation({
+    onSuccess: () => {
+      window.location.reload();
+    },
+  });
+
+  const drawdownPercent = Math.abs(s.totalPnlPercent);
+  const drawdownMax = 40; // maxDrawdownPercent
+  const drawdownRatio = Math.min(drawdownPercent / drawdownMax, 1);
+  const isDrawdownDanger = drawdownPercent >= 30;
+  const isDrawdownCritical = drawdownPercent >= 35;
+
   return (
     <div className="space-y-6">
+      {/* Risk Gauge */}
+      <Card className={`border-2 ${
+        isDrawdownCritical ? "border-red-500 bg-red-500/10" :
+        isDrawdownDanger ? "border-orange-500 bg-orange-500/10" :
+        "border-border bg-card"
+      }`}>
+        <CardContent className="p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className={`h-12 w-12 rounded-xl flex items-center justify-center ${
+                isDrawdownCritical ? "bg-red-500/20" :
+                isDrawdownDanger ? "bg-orange-500/20" :
+                "bg-muted"
+              }`}>
+                <ShieldAlert className={`h-6 w-6 ${
+                  isDrawdownCritical ? "text-red-500" :
+                  isDrawdownDanger ? "text-orange-500" :
+                  "text-muted-foreground"
+                }`} />
+              </div>
+              <div>
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Drawdown Risk</p>
+                <p className={`text-3xl font-bold font-mono ${
+                  isDrawdownCritical ? "text-red-500" :
+                  isDrawdownDanger ? "text-orange-500" :
+                  s.totalPnlPercent < 0 ? "text-loss" : "text-profit"
+                }`}>
+                  {formatPercent(s.totalPnlPercent)}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Auto-pause at -{drawdownMax}% | {formatUsd(s.totalCapitalDeployed)} deployed
+                </p>
+              </div>
+            </div>
+            <div className="flex flex-col items-end gap-2">
+              <Button
+                variant="destructive"
+                size="sm"
+                className="gap-1.5"
+                disabled={s.killSwitch || killSwitchMutation.isPending}
+                onClick={() => killSwitchMutation.mutate({ enabled: true })}
+              >
+                <AlertTriangle className="h-3.5 w-3.5" />
+                {s.killSwitch ? "BOT PAUSED" : "PAUSE BOT"}
+              </Button>
+              {s.killSwitch && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-1.5 text-xs"
+                  disabled={killSwitchMutation.isPending}
+                  onClick={() => killSwitchMutation.mutate({ enabled: false })}
+                >
+                  Resume Bot
+                </Button>
+              )}
+            </div>
+          </div>
+          {/* Drawdown progress bar */}
+          <div className="mt-3 h-2.5 bg-muted rounded-full overflow-hidden">
+            <div
+              className={`h-full rounded-full transition-all duration-500 ${
+                isDrawdownCritical ? "bg-red-500" :
+                isDrawdownDanger ? "bg-orange-500" :
+                drawdownPercent > 15 ? "bg-yellow-500" :
+                "bg-green-500"
+              }`}
+              style={{ width: `${drawdownRatio * 100}%` }}
+            />
+          </div>
+          <div className="flex justify-between mt-1 text-[10px] text-muted-foreground font-mono">
+            <span>0%</span>
+            <span>-10%</span>
+            <span>-20%</span>
+            <span>-30%</span>
+            <span className="text-red-500 font-bold">-40% STOP</span>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>

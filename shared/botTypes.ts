@@ -11,10 +11,11 @@ export interface RiskConfig {
   minAiScore: number;
   killSwitch: boolean;
   botEnabled: boolean;
+  maxDrawdownPercent: number;
 }
 
 export const DEFAULT_RISK_CONFIG: RiskConfig = {
-  maxTotalCapital: 2000,
+  maxTotalCapital: 1200,
   maxPerEvent: 5,           // Flat $5 per event (planktonXD strategy)
   maxCategoryPercent: 15,   // Hard cap: max 15% in any single category
   dailyBuyBudget: 200,
@@ -25,6 +26,7 @@ export const DEFAULT_RISK_CONFIG: RiskConfig = {
   minAiScore: 3,            // Reject-only: 1-2 = impossible, 3+ = buy
   killSwitch: false,
   botEnabled: false,
+  maxDrawdownPercent: 40,   // Hard drawdown stop
 };
 
 /** Dashboard stats */
