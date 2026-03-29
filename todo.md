@@ -100,3 +100,8 @@
 - [x] Add verified/onChainShares/verifiedAt columns to positions table
 - [x] Update dashboard to show verified vs unverified position counts and capital
 - [x] Backfill verified=true for 119 on-chain confirmed positions
+- [x] Reset 67 phantom resolved losses to 'sold' to fix inflated P&L
+- [x] Add on-chain wallet balance tracking (USDC.e query on Polygon)
+- [x] Show Real P&L on dashboard (starting capital minus current wallet balance)
+- [x] Set up Telegram alert secrets (TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID)
+- [x] Wire Telegram alerts into autopilot cycle events

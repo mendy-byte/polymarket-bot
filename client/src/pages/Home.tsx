@@ -18,6 +18,7 @@ import {
   Loader2,
   AlertTriangle,
   Bot,
+  Wallet,
 } from "lucide-react";
 
 function formatUsd(val: number): string {
@@ -102,6 +103,9 @@ function OverviewContent() {
   const { data: fillStats } = trpc.dashboard.fillStats.useQuery(undefined, {
     refetchInterval: 30000,
   });
+  const { data: walletData } = trpc.dashboard.walletBalance.useQuery(undefined, {
+    refetchInterval: 60000,
+  });
   const killSwitchMutation = trpc.risk.killSwitch.useMutation({
     onSuccess: () => {
       window.location.reload();
@@ -142,7 +146,9 @@ function OverviewContent() {
     categoryBreakdown: (stats as any)?.categoryBreakdown ?? [],
   };
 
-  const drawdownPercent = Math.abs(s.totalPnlPercent);
+  // Use real wallet P&L for drawdown if available, otherwise fall back to DB P&L
+  const realPnlPercent = walletData && !walletData.error ? walletData.realPnlPercent : s.totalPnlPercent;
+  const drawdownPercent = Math.abs(Math.min(realPnlPercent, 0));
   const drawdownMax = 40; // maxDrawdownPercent
   const drawdownRatio = Math.min(drawdownPercent / drawdownMax, 1);
   const isDrawdownDanger = drawdownPercent >= 30;
@@ -175,12 +181,12 @@ function OverviewContent() {
                 <p className={`text-3xl font-bold font-mono ${
                   isDrawdownCritical ? "text-red-500" :
                   isDrawdownDanger ? "text-orange-500" :
-                  s.totalPnlPercent < 0 ? "text-loss" : "text-profit"
+                  realPnlPercent < 0 ? "text-loss" : "text-profit"
                 }`}>
-                  {formatPercent(s.totalPnlPercent)}
+                  {formatPercent(realPnlPercent)}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  Auto-pause at -{drawdownMax}% | {formatUsd(s.totalCapitalDeployed)} deployed
+                  Auto-pause at -{drawdownMax}% | {walletData && !walletData.error ? "wallet-based" : "DB-based"} P&L
                 </p>
               </div>
             </div>
@@ -262,6 +268,46 @@ function OverviewContent() {
           </Badge>
         </div>
       </div>
+
+      {/* Wallet Balance - Real P&L */}
+      {walletData && !walletData.error && (
+        <Card className="bg-card border-border">
+          <CardContent className="p-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              <div>
+                <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Wallet Balance</p>
+                <p className="text-2xl font-semibold font-mono text-foreground">{formatUsd(walletData.balance)}</p>
+                <p className="text-xs text-muted-foreground">USDC.e on Polygon</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Real P&L</p>
+                <p className={`text-2xl font-semibold font-mono ${walletData.realPnl >= 0 ? "text-profit" : "text-loss"}`}>
+                  {formatUsd(walletData.realPnl)}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {formatPercent(walletData.realPnlPercent)} from {formatUsd(walletData.startingCapital)}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Capital at Risk</p>
+                <p className="text-2xl font-semibold font-mono text-foreground">
+                  {formatUsd(walletData.startingCapital - walletData.balance)}
+                </p>
+                <p className="text-xs text-muted-foreground">actually left wallet</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Available to Deploy</p>
+                <p className="text-2xl font-semibold font-mono text-foreground">
+                  {formatUsd(walletData.balance)}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {walletData.cached ? "cached" : "live"} balance
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Stats Grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

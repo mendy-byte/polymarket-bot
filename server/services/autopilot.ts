@@ -361,14 +361,26 @@ async function runCycle(): Promise<AutopilotRunStats> {
     const remainingDailyBudget = dailyBuyBudget - dailySpent;
     log(`[Autopilot] Budget: deployed=$${totalDeployed.toFixed(2)}/$${maxTotalCapital}, daily=$${dailySpent.toFixed(2)}/$${dailyBuyBudget}, remaining=$${remainingCapital.toFixed(2)}, dailyRemaining=$${remainingDailyBudget.toFixed(2)}`);
 
-    // ===== DRAWDOWN PROTECTION =====
-    const pnlPercent = dashStats?.totalPnlPercent || 0;
+    // ===== DRAWDOWN PROTECTION (wallet-based) =====
     const maxDrawdown = parseFloat(configMap.get("maxDrawdownPercent") || String(DEFAULT_RISK_CONFIG.maxDrawdownPercent));
-    if (pnlPercent <= -maxDrawdown) {
-      log(`🚨 HARD DRAWDOWN HIT (${pnlPercent.toFixed(1)}% <= -${maxDrawdown}%). Auto-pausing bot.`);
-      await db.setConfig("killSwitch", "true", `Auto-paused due to ${pnlPercent.toFixed(1)}% drawdown`);
-      await sendTelegramAlert(`🚨 BOT AUTO-PAUSED: ${pnlPercent.toFixed(1)}% drawdown hit on $${maxTotalCapital} capital`);
-      stats.errors.push(`Hard drawdown hit: ${pnlPercent.toFixed(1)}%`);
+    let realPnlPercent: number | null = null;
+    try {
+      const { getWalletBalance, calculateRealPnl } = await import("./walletBalance");
+      const wallet = await getWalletBalance();
+      if (!wallet.error && wallet.balance > 0) {
+        const { realPnlPercent: rp } = calculateRealPnl(wallet.balance, maxTotalCapital);
+        realPnlPercent = rp;
+        log(`[Autopilot] Wallet balance: $${wallet.balance.toFixed(2)} | Real P&L: ${rp.toFixed(1)}%`);
+      }
+    } catch (e) {
+      log(`[Autopilot] Wallet balance check failed, falling back to DB P&L`);
+    }
+    const effectivePnlPercent = realPnlPercent !== null ? realPnlPercent : (dashStats?.totalPnlPercent || 0);
+    if (effectivePnlPercent <= -maxDrawdown) {
+      log(`🚨 HARD DRAWDOWN HIT (${effectivePnlPercent.toFixed(1)}% <= -${maxDrawdown}%). Auto-pausing bot.`);
+      await db.setConfig("killSwitch", "true", `Auto-paused due to ${effectivePnlPercent.toFixed(1)}% drawdown`);
+      await sendTelegramAlert(`🚨 BOT AUTO-PAUSED: ${effectivePnlPercent.toFixed(1)}% drawdown hit on $${maxTotalCapital} capital`);
+      stats.errors.push(`Hard drawdown hit: ${effectivePnlPercent.toFixed(1)}%`);
       stats.completedAt = new Date();
       await logCycle(stats);
       return stats;

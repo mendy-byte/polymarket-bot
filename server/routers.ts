@@ -9,6 +9,7 @@ import { scanForCheapOutcomes, analyzeOrderbook } from "./services/gammaApi";
 import { evaluateBatch, evaluateSingle } from "./services/aiEvaluator";
 import { startAutopilot, stopAutopilot, runSingleCycle, getAutopilotStatus } from "./services/autopilot";
 import { initializeClobClient, getClobStatus, placeLimitOrder, cancelAllOrders, getOpenOrders, shutdownClob, checkOrderFills } from "./services/clobTrader";
+import { getWalletBalance, calculateRealPnl } from "./services/walletBalance";
 import type { TickSize as ClobTickSize } from "@polymarket/clob-client";
 import type { ParsedCheapOutcome } from "./services/gammaApi";
 
@@ -44,6 +45,19 @@ export const appRouter = router({
     }),
     fillStats: protectedProcedure.query(async () => {
       return db.getOrderFillStats();
+    }),
+    walletBalance: protectedProcedure.query(async () => {
+      const configRows = await db.getAllConfig();
+      const configMap = new Map(configRows.map(c => [c.key, c.value]));
+      const maxCapital = parseFloat(configMap.get("maxTotalCapital") || String(DEFAULT_RISK_CONFIG.maxTotalCapital));
+      const wallet = await getWalletBalance();
+      const { realPnl, realPnlPercent } = calculateRealPnl(wallet.balance, maxCapital);
+      return {
+        ...wallet,
+        startingCapital: maxCapital,
+        realPnl,
+        realPnlPercent,
+      };
     }),
   }),
 
