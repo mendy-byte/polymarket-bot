@@ -1,0 +1,8 @@
+{
+  "query": "SELECT status, COUNT(*) as cnt, SUM(CAST(amount_usd AS DECIMAL(10,2))) as total_usd, SUM(CASE WHEN order_id IS NOT NULL AND order_id != '' THEN 1 ELSE 0 END) as has_clob_id FROM orders WHERE created_at >= '2026-03-13 10:51:00' GROUP BY status",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3qjSsefs24zghQG.d5f38dec7f6c --database YZ9v9D6zNEEycYVBBKJ8og --execute SELECT status, COUNT(*) as cnt, SUM(CAST(amount_usd AS DECIMAL(10,2))) as total_usd, SUM(CASE WHEN order_id IS NOT NULL AND order_id != '' THEN 1 ELSE 0 END) as has_clob_id FROM orders WHERE created_at >= '2026-03-13 10:51:00' GROUP BY status",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1054 (42S22) at line 1: Unknown column 'created_at' in 'where clause'"
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "query": "SELECT status, COUNT(*) as cnt, SUM(CAST(amountUsd AS DECIMAL(10,2))) as total_usd, SUM(CASE WHEN orderId IS NOT NULL AND orderId != '' THEN 1 ELSE 0 END) as has_clob_id FROM orders WHERE createdAt >= '2026-03-13 10:51:00' GROUP BY status",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3qjSsefs24zghQG.d5f38dec7f6c --database YZ9v9D6zNEEycYVBBKJ8og --execute SELECT status, COUNT(*) as cnt, SUM(CAST(amountUsd AS DECIMAL(10,2))) as total_usd, SUM(CASE WHEN orderId IS NOT NULL AND orderId != '' THEN 1 ELSE 0 END) as has_clob_id FROM orders WHERE createdAt >= '2026-03-13 10:51:00' GROUP BY status",
+  "rows": [
+    {
+      "status": "placed",
+      "cnt": "60",
+      "total_usd": "300.00",
+      "has_clob_id": "0"
+    }
+  ],
+  "messages": [],
+  "stdout": "status\tcnt\ttotal_usd\thas_clob_id\nplaced\t60\t300.00\t0\n",
+  "stderr": "",
+  "execution_time_ms": 57
+}

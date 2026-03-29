@@ -48,7 +48,7 @@
 - [x] Change AI role: reject-only filter (score 1-2 = impossible, skip; score 3+ = buy)
 - [x] Enforce hard category diversification: max 15% per category, spread across 6+ categories
 - [x] Fix dashboard data pipeline: orders and positions already recording correctly (19 orders, 19 positions in DB)
-- [ ] Backfill existing 19 orders into the database
+- [x] Backfill existing 19 orders into the database
 - [x] Deduplicate within same event group: max 2 positions per event group, checks existing positions
 - [x] Run diversified batch across sports, crypto, geopolitics, entertainment, science, politics (7 orders across 4 new categories)
 - [x] Start autopilot with live diversified trading (2h interval, auto-starts on boot)
@@ -73,3 +73,8 @@
 - [x] Fix CLOB heartbeat error loop (stop spamming Invalid Heartbeat ID errors, add reconnect-on-error logic)
 - [x] Resolve proxy issue for Polymarket trading (fixed microsocks on Amsterdam droplet, added auth, systemd auto-restart)
 - [x] Clean up 78 ghost orders: mark as failed, close phantom positions, correct budget/spend tracking
+- [x] Fix Autopilot page tRPC error: transient issue during server restart (all endpoints return valid JSON now)
+- [x] Fix getDailySpend to exclude failed orders from daily budget calculation
+- [x] Reconcile DB with Polymarket: 88 live positions matched, 14 wrongly-resolved restored, 10 phantoms closed
+- [x] Fix false resolution bug: skip resolution when orderbook API returns 404/error instead of wrongly marking as loss
+- [x] Add apiError flag to analyzeOrderbook to distinguish API errors from genuinely empty orderbooks

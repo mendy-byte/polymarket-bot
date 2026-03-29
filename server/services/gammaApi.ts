@@ -244,6 +244,7 @@ export async function analyzeOrderbook(tokenId: string): Promise<{
   fillableAtPrice: boolean;
   bids: Array<{ price: string; size: string }>;
   asks: Array<{ price: string; size: string }>;
+  apiError?: boolean;
 }> {
   try {
     const book = await fetchOrderbook(tokenId);
@@ -265,6 +266,7 @@ export async function analyzeOrderbook(tokenId: string): Promise<{
       fillableAtPrice: bestAsk !== null && askDepth > 0,
       bids: bids.slice(0, 10),
       asks: asks.slice(0, 10),
+      apiError: false,
     };
   } catch (err) {
     console.error(`[Orderbook] Error analyzing ${tokenId}:`, err);
@@ -277,6 +279,7 @@ export async function analyzeOrderbook(tokenId: string): Promise<{
       fillableAtPrice: false,
       bids: [],
       asks: [],
+      apiError: true, // Flag that this was an API error, not a genuinely empty orderbook
     };
   }
 }

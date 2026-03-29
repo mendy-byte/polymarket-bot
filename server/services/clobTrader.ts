@@ -303,21 +303,36 @@ export async function placeLimitOrder(
     const normalizedTick = normalizeTickSize(tickSize);
     console.log(`[CLOB] Placing order: token=${tokenId.slice(0,10)}... price=${validPrice} size=${adjustedSize} tick=${normalizedTick} negRisk=${negRisk}`);
 
-    const response = await client.createAndPostOrder(
-      {
-        tokenID: tokenId,
-        price: validPrice,
-        size: adjustedSize,
-        side: Side.BUY,
-      },
-      {
-        tickSize: normalizedTick,
-        negRisk,
-      } as Partial<CreateOrderOptions>,
-      OrderType.GTC,
-    );
+    // Suppress console during order placement to prevent CLOB library error dumps
+    const origError = console.error;
+    const origLog = console.log;
+    let response: any;
+    try {
+      console.error = () => {};
+      console.log = () => {};
+      response = await client.createAndPostOrder(
+        {
+          tokenID: tokenId,
+          price: validPrice,
+          size: adjustedSize,
+          side: Side.BUY,
+        },
+        {
+          tickSize: normalizedTick,
+          negRisk,
+        } as Partial<CreateOrderOptions>,
+        OrderType.GTC,
+      );
+    } finally {
+      console.error = origError;
+      console.log = origLog;
+    }
+
+    // Log the actual response for debugging
+    console.log(`[CLOB] Order response: ${JSON.stringify(response)?.slice(0, 300)}`);
 
     if (response && response.orderID) {
+      console.log(`[CLOB] Order placed successfully: ${response.orderID}`);
       return {
         success: true,
         orderId: response.orderID,
@@ -327,15 +342,19 @@ export async function placeLimitOrder(
 
     // Check if the response indicates an error
     if (response && (response as any).errorMsg) {
+      console.error(`[CLOB] Order error response: ${(response as any).errorMsg}`);
       return {
         success: false,
         errorMsg: (response as any).errorMsg,
       };
     }
 
+    // If no orderID and no explicit error, treat as failure
+    const respStr = JSON.stringify(response)?.slice(0, 200) || 'null';
+    console.error(`[CLOB] Order returned no orderID: ${respStr}`);
     return {
-      success: true,
-      orderId: response?.orderID || "unknown",
+      success: false,
+      errorMsg: `No orderID in response: ${respStr}`,
     };
 
   } catch (err: any) {

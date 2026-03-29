@@ -1,4 +1,4 @@
-import { eq, and, gte, sql, desc, inArray } from "drizzle-orm";
+import { eq, and, gte, sql, desc, inArray, ne, notInArray } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import mysql from "mysql2";
 import { InsertUser, users, scannedEvents, positions, orders, botConfig, scanLogs } from "../drizzle/schema";
@@ -404,7 +404,8 @@ export async function getDashboardStats() {
   const db = await getDb();
   if (!db) return null;
 
-  const allPositions = await db.select().from(positions);
+  // Exclude "sold" (phantom/cleaned-up) positions from all calculations
+  const allPositions = await db.select().from(positions).where(ne(positions.status, "sold"));
   const openPos = allPositions.filter(p => p.status === "open");
   const wins = allPositions.filter(p => p.status === "resolved_win");
   const losses = allPositions.filter(p => p.status === "resolved_loss");
@@ -429,7 +430,13 @@ export async function getDashboardStats() {
   // Convert EST midnight back to UTC for DB query
   const estOffsetMs = new Date().getTime() - new Date(new Date().toLocaleString('en-US', { timeZone: 'America/New_York' })).getTime();
   const today = new Date(nowEst.getTime() + estOffsetMs);
-  const todayOrders = await db.select().from(orders).where(gte(orders.createdAt, today));
+  // Only count filled orders (exclude failed/cancelled ghost orders)
+  const todayOrders = await db.select().from(orders).where(
+    and(
+      gte(orders.createdAt, today),
+      notInArray(orders.status, ["failed", "cancelled"])
+    )
+  );
   const dailySpent = todayOrders.reduce((s, o) => s + parseFloat(o.amountUsd), 0);
 
   const resolved = wins.length + losses.length;

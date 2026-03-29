@@ -231,6 +231,13 @@ async function checkResolutions(): Promise<{ wins: number; losses: number; check
       const ob = await analyzeOrderbook(pos.tokenId);
       checked++;
 
+      // Skip resolution decisions when the API returned an error (404, timeout, etc.)
+      // An API error means we can't reliably determine the market state
+      if (ob.apiError) {
+        log(`[Autopilot] Skipping resolution for position ${pos.id} — API error (404/timeout)`);
+        continue;
+      }
+
       if (ob.bestBid !== null && ob.bestBid >= 0.95) {
         await db.resolvePosition(pos.id, true);
         wins++;

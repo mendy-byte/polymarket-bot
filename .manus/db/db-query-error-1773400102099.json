@@ -1,0 +1,8 @@
+{
+  "query": "UPDATE orders SET status = 'failed', notes = 'Ghost order: CLOB returned no orderID (proxy/geo-block issue)' WHERE createdAt >= '2026-03-13 10:51:00' AND status = 'placed' AND (orderId IS NULL OR orderId = '')",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3qjSsefs24zghQG.d5f38dec7f6c --database YZ9v9D6zNEEycYVBBKJ8og --execute UPDATE orders SET status = 'failed', notes = 'Ghost order: CLOB returned no orderID (proxy/geo-block issue)' WHERE createdAt >= '2026-03-13 10:51:00' AND status = 'placed' AND (orderId IS NULL OR orderId = '')",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1054 (42S22) at line 1: Unknown column 'notes' in 'field list'"
+  ]
+}
