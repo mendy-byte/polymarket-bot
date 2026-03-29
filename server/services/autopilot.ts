@@ -38,6 +38,7 @@ function log(msg: string) {
 import { scanForCheapOutcomes, analyzeOrderbook, lookupMarketResolution } from "./gammaApi";
 import { evaluateBatch } from "./aiEvaluator";
 import { placeLimitOrder, initializeClobClient, getClobStatus, checkOrderFills } from "./clobTrader";
+import { verifyAllOpenPositions, verifyNewPosition } from "./onChainVerifier";
 import type { TickSize as ClobTickSize } from "@polymarket/clob-client";
 import type { ParsedCheapOutcome } from "./gammaApi";
 import * as db from "../db";
@@ -629,6 +630,18 @@ async function runCycle(): Promise<AutopilotRunStats> {
       }
     } catch (fillErr: any) {
       log(`[Autopilot] ERROR: Fill check error: ${fillErr.message}`);
+    }
+
+    // === Step 7: On-chain verification ===
+    log("[Autopilot] Step 7: Verifying positions on-chain...");
+    try {
+      const verifyStats = await verifyAllOpenPositions();
+      log(`[Autopilot] Verification: ${verifyStats.verified} verified, ${verifyStats.phantom} phantom removed, ${verifyStats.errors} errors`);
+      if (verifyStats.phantom > 0) {
+        await sendTelegramAlert(`⚠️ Removed ${verifyStats.phantom} phantom positions (0 on-chain balance)`);
+      }
+    } catch (verifyErr: any) {
+      log(`[Autopilot] ERROR: Verification error: ${verifyErr.message}`);
     }
 
     stats.completedAt = new Date();

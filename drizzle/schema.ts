@@ -69,6 +69,9 @@ export const positions = mysqlTable("positions", {
   resolvedAt: timestamp("resolvedAt"),
   resolutionPayout: decimal("resolutionPayout", { precision: 18, scale: 6 }),
   endDate: timestamp("endDate"),
+  verified: boolean("verified").default(false),
+  onChainShares: decimal("onChainShares", { precision: 18, scale: 6 }),
+  verifiedAt: timestamp("verifiedAt"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });

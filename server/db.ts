@@ -400,6 +400,39 @@ export async function getResolvedPositionsSummary() {
   };
 }
 
+// ===== Position Verification =====
+export async function getUnverifiedPositions() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(positions)
+    .where(and(eq(positions.status, "open" as any), eq(positions.verified, false)))
+    .orderBy(desc(positions.createdAt));
+}
+
+export async function updatePositionVerification(id: number, isVerified: boolean, onChainBalance: number) {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(positions).set({
+    verified: isVerified,
+    onChainShares: String(onChainBalance),
+    verifiedAt: new Date(),
+  }).where(eq(positions.id, id));
+}
+
+export async function markPositionAsSold(id: number) {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(positions).set({
+    status: "sold",
+    costBasis: "0",
+    shares: "0",
+    pnl: "0",
+    currentValue: "0",
+    verified: false,
+    onChainShares: "0",
+  }).where(eq(positions.id, id));
+}
+
 // ===== Dashboard Stats =====
 export async function getDashboardStats() {
   const db = await getDb();
@@ -408,10 +441,16 @@ export async function getDashboardStats() {
   // Exclude "sold" (phantom/cleaned-up) positions from all calculations
   const allPositions = await db.select().from(positions).where(ne(positions.status, "sold"));
   const openPos = allPositions.filter(p => p.status === "open");
+  const verifiedOpen = openPos.filter(p => p.verified);
+  const unverifiedOpen = openPos.filter(p => !p.verified);
   const wins = allPositions.filter(p => p.status === "resolved_win");
   const losses = allPositions.filter(p => p.status === "resolved_loss");
 
-  const totalCost = allPositions.reduce((s, p) => s + parseFloat(p.costBasis), 0);
+  // Capital deployed: only count verified open positions + resolved (which were real)
+  const verifiedOpenCost = verifiedOpen.reduce((s, p) => s + parseFloat(p.costBasis), 0);
+  const unverifiedOpenCost = unverifiedOpen.reduce((s, p) => s + parseFloat(p.costBasis), 0);
+  const resolvedCost = [...wins, ...losses].reduce((s, p) => s + parseFloat(p.costBasis), 0);
+  const totalCost = verifiedOpenCost + unverifiedOpenCost + resolvedCost;
   const totalPnl = allPositions.reduce((s, p) => s + parseFloat(p.pnl || "0"), 0);
   const unrealizedPnl = openPos.reduce((s, p) => s + parseFloat(p.pnl || "0"), 0);
 
@@ -447,6 +486,10 @@ export async function getDashboardStats() {
     totalCapitalDeployed: totalCost,
     totalPositions: allPositions.length,
     openPositions: openPos.length,
+    verifiedPositions: verifiedOpen.length,
+    unverifiedPositions: unverifiedOpen.length,
+    verifiedCapital: verifiedOpenCost,
+    unverifiedCapital: unverifiedOpenCost,
     resolvedWins: wins.length,
     resolvedLosses: losses.length,
     totalPnl,

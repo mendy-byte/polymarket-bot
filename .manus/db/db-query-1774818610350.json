@@ -1,0 +1,9 @@
+{
+  "query": "UPDATE positions SET status = 'sold', costBasis = 0, shares = 0, pnl = 0, currentValue = 0 WHERE id IN (27, 29, 30, 30048, 30052, 30063, 30065, 30067, 30069, 30074, 420026, 420046, 420048) AND status = 'open'",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3qjSsefs24zghQG.d5f38dec7f6c --database YZ9v9D6zNEEycYVBBKJ8og --execute UPDATE positions SET status = 'sold', costBasis = 0, shares = 0, pnl = 0, currentValue = 0 WHERE id IN (27, 29, 30, 30048, 30052, 30063, 30065, 30067, 30069, 30074, 420026, 420046, 420048) AND status = 'open'",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 56
+}

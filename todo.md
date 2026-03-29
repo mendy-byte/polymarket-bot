@@ -93,3 +93,10 @@
 - [x] Create Telegram alert service (server/services/telegram.ts)
 - [x] Optimize proxySetup.ts for Frankfurt (direct-first, proxy as backup)
 - [x] Add Risk Gauge box to dashboard overview page
+- [x] Investigate capital deployed discrepancy: DB shows $956 but wallet doesn't match
+- [x] Check actual Polymarket portfolio via CLOB API and on-chain CTF balances
+- [x] Reconcile DB: 13 phantom positions marked as sold (0 on-chain balance)
+- [x] Build on-chain verification system (onChainVerifier.ts) into autopilot cycle (Step 7)
+- [x] Add verified/onChainShares/verifiedAt columns to positions table
+- [x] Update dashboard to show verified vs unverified position counts and capital
+- [x] Backfill verified=true for 119 on-chain confirmed positions

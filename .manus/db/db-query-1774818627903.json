@@ -1,0 +1,25 @@
+{
+  "query": "SELECT status, COUNT(*) as cnt, ROUND(SUM(costBasis), 2) as total_cost FROM positions GROUP BY status ORDER BY status",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3qjSsefs24zghQG.d5f38dec7f6c --database YZ9v9D6zNEEycYVBBKJ8og --execute SELECT status, COUNT(*) as cnt, ROUND(SUM(costBasis), 2) as total_cost FROM positions GROUP BY status ORDER BY status",
+  "rows": [
+    {
+      "status": "open",
+      "cnt": "119",
+      "total_cost": "652.09"
+    },
+    {
+      "status": "resolved_loss",
+      "cnt": "67",
+      "total_cost": "250.79"
+    },
+    {
+      "status": "sold",
+      "cnt": "289",
+      "total_cost": "0.00"
+    }
+  ],
+  "messages": [],
+  "stdout": "status\tcnt\ttotal_cost\nopen\t119\t652.09\nresolved_loss\t67\t250.79\nsold\t289\t0.00\n",
+  "stderr": "",
+  "execution_time_ms": 58
+}

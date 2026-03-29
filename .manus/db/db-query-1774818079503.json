@@ -1,0 +1,40 @@
+{
+  "query": "SELECT status, COUNT(*) as cnt, ROUND(SUM(amountUsd), 2) as total_usd FROM orders GROUP BY status ORDER BY status",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3qjSsefs24zghQG.d5f38dec7f6c --database YZ9v9D6zNEEycYVBBKJ8og --execute SELECT status, COUNT(*) as cnt, ROUND(SUM(amountUsd), 2) as total_usd FROM orders GROUP BY status ORDER BY status",
+  "rows": [
+    {
+      "status": "pending",
+      "cnt": "1",
+      "total_usd": "5.00"
+    },
+    {
+      "status": "placed",
+      "cnt": "270",
+      "total_usd": "1350.00"
+    },
+    {
+      "status": "filled",
+      "cnt": "75",
+      "total_usd": "384.95"
+    },
+    {
+      "status": "partial",
+      "cnt": "1",
+      "total_usd": "5.00"
+    },
+    {
+      "status": "cancelled",
+      "cnt": "51",
+      "total_usd": "260.00"
+    },
+    {
+      "status": "failed",
+      "cnt": "89",
+      "total_usd": "445.00"
+    }
+  ],
+  "messages": [],
+  "stdout": "status\tcnt\ttotal_usd\npending\t1\t5.00\nplaced\t270\t1350.00\nfilled\t75\t384.95\npartial\t1\t5.00\ncancelled\t51\t260.00\nfailed\t89\t445.00\n",
+  "stderr": "",
+  "execution_time_ms": 55
+}

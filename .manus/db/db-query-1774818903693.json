@@ -1,0 +1,9 @@
+{
+  "query": "UPDATE positions SET verified = true, verifiedAt = NOW() WHERE status = 'open' AND id NOT IN (SELECT id FROM (SELECT id FROM positions WHERE status = 'sold' AND costBasis = '0') AS sold_phantoms)",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3qjSsefs24zghQG.d5f38dec7f6c --database YZ9v9D6zNEEycYVBBKJ8og --execute UPDATE positions SET verified = true, verifiedAt = NOW() WHERE status = 'open' AND id NOT IN (SELECT id FROM (SELECT id FROM positions WHERE status = 'sold' AND costBasis = '0') AS sold_phantoms)",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 86
+}

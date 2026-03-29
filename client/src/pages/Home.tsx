@@ -120,6 +120,10 @@ function OverviewContent() {
     totalCapitalDeployed: stats?.totalCapitalDeployed ?? 0,
     totalPositions: stats?.totalPositions ?? 0,
     openPositions: stats?.openPositions ?? 0,
+    verifiedPositions: (stats as any)?.verifiedPositions ?? 0,
+    unverifiedPositions: (stats as any)?.unverifiedPositions ?? 0,
+    verifiedCapital: (stats as any)?.verifiedCapital ?? 0,
+    unverifiedCapital: (stats as any)?.unverifiedCapital ?? 0,
     resolvedWins: stats?.resolvedWins ?? 0,
     resolvedLosses: stats?.resolvedLosses ?? 0,
     totalPnl: stats?.totalPnl ?? 0,
@@ -264,7 +268,9 @@ function OverviewContent() {
         <StatCard
           title="Capital Deployed"
           value={formatUsd(s.totalCapitalDeployed)}
-          subtitle={`of ${formatUsd(s.maxCapital)} max`}
+          subtitle={s.unverifiedPositions > 0
+            ? `${formatUsd(s.verifiedCapital)} verified · ${formatUsd(s.unverifiedCapital)} pending`
+            : `of ${formatUsd(s.maxCapital)} max`}
           icon={DollarSign}
         />
         <StatCard
@@ -277,7 +283,9 @@ function OverviewContent() {
         <StatCard
           title="Open Positions"
           value={String(s.openPositions)}
-          subtitle={`${s.totalPositions} total`}
+          subtitle={s.unverifiedPositions > 0
+            ? `${s.verifiedPositions} verified · ${s.unverifiedPositions} pending`
+            : `${s.totalPositions} total`}
           icon={Target}
         />
         <StatCard

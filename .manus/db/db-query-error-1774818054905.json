@@ -1,0 +1,12 @@
+{
+  "query": "SELECT value FROM bot_config WHERE `key` = 'walletAddress';\n\nSELECT status, COUNT(*) as cnt, ROUND(SUM(costBasis), 2) as total_cost, ROUND(SUM(shares), 4) as total_shares FROM positions GROUP BY status ORDER BY status;\n\nSELECT status, COUNT(*) as cnt, ROUND(SUM(cost), 4) as total_cost FROM orders GROUP BY status ORDER BY status;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3qjSsefs24zghQG.d5f38dec7f6c --database YZ9v9D6zNEEycYVBBKJ8og --execute SELECT value FROM bot_config WHERE `key` = 'walletAddress';\n\nSELECT status, COUNT(*) as cnt, ROUND(SUM(costBasis), 2) as total_cost, ROUND(SUM(shares), 4) as total_shares FROM positions GROUP BY status ORDER BY status;\n\nSELECT status, COUNT(*) as cnt, ROUND(SUM(cost), 4) as total_cost FROM orders GROUP BY status ORDER BY status;",
+  "returncode": 1,
+  "logs": [
+    "status\tcnt\ttotal_cost\ttotal_shares",
+    "open\t132\t705.62\t165380.4880",
+    "resolved_loss\t67\t250.79\t89638.3877",
+    "sold\t276\t0.00\t0.0000",
+    "ERROR 1054 (42S22) at line 5: Unknown column 'cost' in 'group statement'"
+  ]
+}

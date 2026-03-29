@@ -1,0 +1,16 @@
+{
+  "query": "SELECT status, verified, COUNT(*) as cnt, SUM(CAST(costBasis AS DECIMAL(18,6))) as total_cost FROM positions WHERE status = 'open' GROUP BY status, verified",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3qjSsefs24zghQG.d5f38dec7f6c --database YZ9v9D6zNEEycYVBBKJ8og --execute SELECT status, verified, COUNT(*) as cnt, SUM(CAST(costBasis AS DECIMAL(18,6))) as total_cost FROM positions WHERE status = 'open' GROUP BY status, verified",
+  "rows": [
+    {
+      "status": "open",
+      "verified": "1",
+      "cnt": "119",
+      "total_cost": "652.089738"
+    }
+  ],
+  "messages": [],
+  "stdout": "status\tverified\tcnt\ttotal_cost\nopen\t1\t119\t652.089738\n",
+  "stderr": "",
+  "execution_time_ms": 66
+}
