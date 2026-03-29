@@ -102,6 +102,11 @@ function OverviewContent() {
   const { data: fillStats } = trpc.dashboard.fillStats.useQuery(undefined, {
     refetchInterval: 30000,
   });
+  const killSwitchMutation = trpc.risk.killSwitch.useMutation({
+    onSuccess: () => {
+      window.location.reload();
+    },
+  });
 
   if (isLoading) {
     return (
@@ -127,17 +132,11 @@ function OverviewContent() {
     categoriesUsed: stats?.categoriesUsed ?? 0,
     dailySpent: stats?.dailySpent ?? 0,
     remainingBudget: stats?.remainingBudget ?? 0,
-    maxCapital: stats?.maxCapital ?? 2000,
+    maxCapital: stats?.maxCapital ?? 1200,
     killSwitch: stats?.killSwitch ?? false,
     botEnabled: stats?.botEnabled ?? false,
     categoryBreakdown: (stats as any)?.categoryBreakdown ?? [],
   };
-
-  const killSwitchMutation = trpc.risk.killSwitch.useMutation({
-    onSuccess: () => {
-      window.location.reload();
-    },
-  });
 
   const drawdownPercent = Math.abs(s.totalPnlPercent);
   const drawdownMax = 40; // maxDrawdownPercent
