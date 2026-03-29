@@ -42,6 +42,7 @@ export interface OrderResult {
   orderId?: string;
   errorMsg?: string;
   transactionsHashes?: string[];
+  matched?: boolean;
 }
 
 /**
@@ -332,11 +333,13 @@ export async function placeLimitOrder(
     console.log(`[CLOB] Order response: ${JSON.stringify(response)?.slice(0, 300)}`);
 
     if (response && response.orderID) {
-      console.log(`[CLOB] Order placed successfully: ${response.orderID}`);
+      const isMatched = response.status === "matched";
+      console.log(`[CLOB] Order ${isMatched ? 'MATCHED (filled)' : 'placed'}: ${response.orderID}`);
       return {
         success: true,
         orderId: response.orderID,
         transactionsHashes: response.transactionsHashes,
+        matched: isMatched,
       };
     }
 

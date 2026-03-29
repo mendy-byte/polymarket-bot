@@ -1,0 +1,25 @@
+{
+  "query": "\nSELECT 'open' as type, COUNT(*) as cnt, SUM(costBasis) as total FROM positions WHERE status='open'\nUNION ALL\nSELECT 'resolved', COUNT(*), SUM(pnl) FROM positions WHERE status='resolved'\nUNION ALL\nSELECT 'sold', COUNT(*), 0 FROM positions WHERE status IN ('sold','closed');\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3qjSsefs24zghQG.d5f38dec7f6c --database YZ9v9D6zNEEycYVBBKJ8og --execute \nSELECT 'open' as type, COUNT(*) as cnt, SUM(costBasis) as total FROM positions WHERE status='open'\nUNION ALL\nSELECT 'resolved', COUNT(*), SUM(pnl) FROM positions WHERE status='resolved'\nUNION ALL\nSELECT 'sold', COUNT(*), 0 FROM positions WHERE status IN ('sold','closed');\n",
+  "rows": [
+    {
+      "type": "resolved",
+      "cnt": "0",
+      "total": "NULL"
+    },
+    {
+      "type": "sold",
+      "cnt": "276",
+      "total": "0.000000"
+    },
+    {
+      "type": "open",
+      "cnt": "87",
+      "total": "466.417230"
+    }
+  ],
+  "messages": [],
+  "stdout": "type\tcnt\ttotal\nresolved\t0\tNULL\nsold\t276\t0.000000\nopen\t87\t466.417230\n",
+  "stderr": "",
+  "execution_time_ms": 95
+}

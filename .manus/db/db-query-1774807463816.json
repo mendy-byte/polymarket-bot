@@ -1,0 +1,9 @@
+{
+  "query": "\nUPDATE orders SET status = 'failed', errorMessage = 'Stuck in pending - server restarted during placement' WHERE id = 420005 AND status = 'pending';\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3qjSsefs24zghQG.d5f38dec7f6c --database YZ9v9D6zNEEycYVBBKJ8og --execute \nUPDATE orders SET status = 'failed', errorMessage = 'Stuck in pending - server restarted during placement' WHERE id = 420005 AND status = 'pending';\n",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 61
+}

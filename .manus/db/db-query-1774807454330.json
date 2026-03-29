@@ -1,0 +1,35 @@
+{
+  "query": "SELECT id, orderId, errorMessage FROM orders WHERE orderId IS NOT NULL ORDER BY id DESC LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3qjSsefs24zghQG.d5f38dec7f6c --database YZ9v9D6zNEEycYVBBKJ8og --execute SELECT id, orderId, errorMessage FROM orders WHERE orderId IS NOT NULL ORDER BY id DESC LIMIT 5;",
+  "rows": [
+    {
+      "id": "420002",
+      "orderId": "0x3c3b1fccb95e12805ea5787ea7ef0ae11c0580532d18d9352578ef385d6bf919",
+      "errorMessage": "CLOB order: 0x3c3b1fccb95e12805ea5787ea7ef0ae11c0580532d18d9352578ef385d6bf919"
+    },
+    {
+      "id": "420001",
+      "orderId": "0xb27ddf33fac8ba7ecd290a79cde13d73daba799966e75e0420e7822a61309db4",
+      "errorMessage": "CLOB order: 0xb27ddf33fac8ba7ecd290a79cde13d73daba799966e75e0420e7822a61309db4"
+    },
+    {
+      "id": "30080",
+      "orderId": "0x023816d9e514d1a2405e4e9dea23ee833168fe44b6f92a87a51308596ff3e084",
+      "errorMessage": "CLOB order: 0x023816d9e514d1a2405e4e9dea23ee833168fe44b6f92a87a51308596ff3e084"
+    },
+    {
+      "id": "30079",
+      "orderId": "0x4dc186cbd8e9b167cb8f65c005cf9dcf83003a8b08375773cf033256cd41d43f",
+      "errorMessage": "CLOB order: 0x4dc186cbd8e9b167cb8f65c005cf9dcf83003a8b08375773cf033256cd41d43f"
+    },
+    {
+      "id": "30078",
+      "orderId": "0xcc6921090096da0165b61767c318afd66fd6f0b530ee8aff037431b669e88d19",
+      "errorMessage": "CLOB order: 0xcc6921090096da0165b61767c318afd66fd6f0b530ee8aff037431b669e88d19"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\torderId\terrorMessage\n420002\t0x3c3b1fccb95e12805ea5787ea7ef0ae11c0580532d18d9352578ef385d6bf919\tCLOB order: 0x3c3b1fccb95e12805ea5787ea7ef0ae11c0580532d18d9352578ef385d6bf919\n420001\t0xb27ddf33fac8ba7ecd290a79cde13d73daba799966e75e0420e7822a61309db4\tCLOB order: 0xb27ddf33fac8ba7ecd290a79cde13d73daba799966e75e0420e7822a61309db4\n30080\t0x023816d9e514d1a2405e4e9dea23ee833168fe44b6f92a87a51308596ff3e084\tCLOB order: 0x023816d9e514d1a2405e4e9dea23ee833168fe44b6f92a87a51308596ff3e084\n30079\t0x4dc186cbd8e9b167cb8f65c005cf9dcf83003a8b08375773cf033256cd41d43f\tCLOB order: 0x4dc186cbd8e9b167cb8f65c005cf9dcf83003a8b08375773cf033256cd41d43f\n30078\t0xcc6921090096da0165b61767c318afd66fd6f0b530ee8aff037431b669e88d19\tCLOB order: 0xcc6921090096da0165b61767c318afd66fd6f0b530ee8aff037431b669e88d19\n",
+  "stderr": "",
+  "execution_time_ms": 56
+}

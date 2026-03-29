@@ -78,3 +78,10 @@
 - [x] Reconcile DB with Polymarket: 88 live positions matched, 14 wrongly-resolved restored, 10 phantoms closed
 - [x] Fix false resolution bug: skip resolution when orderbook API returns 404/error instead of wrongly marking as loss
 - [x] Add apiError flag to analyzeOrderbook to distinguish API errors from genuinely empty orderbooks
+- [x] Fix orderId capture: store CLOB order ID in orders.orderId column (was going to errorMessage)
+- [x] Detect immediately matched orders: mark as 'filled' instead of 'placed' when CLOB returns status=matched
+- [x] Backfill 52 historical CLOB order IDs from errorMessage field into orderId column
+- [x] Fix autopilot dedup: only check open positions for event-group dedup (was counting sold/closed too)
+- [x] Add Gamma API market resolution lookup: resolve stale 404 positions by checking Gamma API for closed/resolved status
+- [x] Resolve 13 stale positions via Gamma API fallback (Fed rate, Academy Awards, PLAYERS Championship, etc.)
+- [x] Verify live order cycle: 15+ orders filled with proper orderId capture in single cycle

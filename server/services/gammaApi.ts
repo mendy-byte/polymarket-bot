@@ -107,6 +107,45 @@ export async function fetchTags(): Promise<Array<{ id: string; label: string; sl
   return fetchJson(`${GAMMA_BASE}/tags`);
 }
 
+/**
+ * Look up a market by its conditionId or marketId to check resolution status.
+ * Returns the market's resolved state and winning outcome.
+ */
+export async function lookupMarketResolution(marketId: string): Promise<{
+  resolved: boolean;
+  winningOutcome: string | null;
+  closed: boolean;
+  active: boolean;
+  outcomePrices: number[];
+} | null> {
+  try {
+    const url = `${GAMMA_BASE}/markets/${marketId}`;
+    const market = await fetchJson<RawMarket>(url);
+    const prices = parseJsonField<string[]>(market.outcomePrices, []);
+    const numPrices = prices.map(p => parseFloat(p));
+    
+    // Determine winning outcome: if one price is 1.0 (or very close), that outcome won
+    let winningOutcome: string | null = null;
+    const outcomes = parseJsonField<string[]>(market.outcomes, []);
+    for (let i = 0; i < numPrices.length; i++) {
+      if (numPrices[i] >= 0.99) {
+        winningOutcome = outcomes[i] || null;
+      }
+    }
+    
+    return {
+      resolved: market.closed && !market.active,
+      winningOutcome,
+      closed: market.closed,
+      active: market.active,
+      outcomePrices: numPrices,
+    };
+  } catch (err) {
+    // Market not found or API error
+    return null;
+  }
+}
+
 function parseJsonField<T>(field: string | undefined, fallback: T): T {
   if (!field) return fallback;
   try {

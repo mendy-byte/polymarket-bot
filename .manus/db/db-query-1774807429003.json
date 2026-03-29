@@ -1,0 +1,130 @@
+{
+  "query": "SELECT id, status, amountUsd, orderId, errorMessage, createdAt FROM orders ORDER BY id DESC LIMIT 15;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3qjSsefs24zghQG.d5f38dec7f6c --database YZ9v9D6zNEEycYVBBKJ8og --execute SELECT id, status, amountUsd, orderId, errorMessage, createdAt FROM orders ORDER BY id DESC LIMIT 15;",
+  "rows": [
+    {
+      "id": "420005",
+      "status": "pending",
+      "amountUsd": "5.000000",
+      "orderId": "NULL",
+      "errorMessage": "NULL",
+      "createdAt": "2026-03-29 18:01:34"
+    },
+    {
+      "id": "420004",
+      "status": "failed",
+      "amountUsd": "5.000000",
+      "orderId": "NULL",
+      "errorMessage": "CLOB error: No orderID in response: {\"error\":\"service not ready\",\"status\":425}",
+      "createdAt": "2026-03-29 18:01:29"
+    },
+    {
+      "id": "420003",
+      "status": "failed",
+      "amountUsd": "5.000000",
+      "orderId": "NULL",
+      "errorMessage": "CLOB error: Proxy connection timed out",
+      "createdAt": "2026-03-29 18:00:57"
+    },
+    {
+      "id": "420002",
+      "status": "placed",
+      "amountUsd": "5.000000",
+      "orderId": "NULL",
+      "errorMessage": "CLOB order: 0x3c3b1fccb95e12805ea5787ea7ef0ae11c0580532d18d9352578ef385d6bf919",
+      "createdAt": "2026-03-29 18:00:54"
+    },
+    {
+      "id": "420001",
+      "status": "placed",
+      "amountUsd": "5.000000",
+      "orderId": "NULL",
+      "errorMessage": "CLOB order: 0xb27ddf33fac8ba7ecd290a79cde13d73daba799966e75e0420e7822a61309db4",
+      "createdAt": "2026-03-29 18:00:50"
+    },
+    {
+      "id": "390060",
+      "status": "placed",
+      "amountUsd": "5.000000",
+      "orderId": "NULL",
+      "errorMessage": "CLOB order: unknown",
+      "createdAt": "2026-03-22 16:03:59"
+    },
+    {
+      "id": "390059",
+      "status": "placed",
+      "amountUsd": "5.000000",
+      "orderId": "NULL",
+      "errorMessage": "CLOB order: unknown",
+      "createdAt": "2026-03-22 16:03:50"
+    },
+    {
+      "id": "390058",
+      "status": "placed",
+      "amountUsd": "5.000000",
+      "orderId": "NULL",
+      "errorMessage": "CLOB order: unknown",
+      "createdAt": "2026-03-22 16:03:44"
+    },
+    {
+      "id": "390057",
+      "status": "placed",
+      "amountUsd": "5.000000",
+      "orderId": "NULL",
+      "errorMessage": "CLOB order: unknown",
+      "createdAt": "2026-03-22 16:03:37"
+    },
+    {
+      "id": "390056",
+      "status": "placed",
+      "amountUsd": "5.000000",
+      "orderId": "NULL",
+      "errorMessage": "CLOB order: unknown",
+      "createdAt": "2026-03-22 16:03:33"
+    },
+    {
+      "id": "390055",
+      "status": "placed",
+      "amountUsd": "5.000000",
+      "orderId": "NULL",
+      "errorMessage": "CLOB order: unknown",
+      "createdAt": "2026-03-22 16:03:28"
+    },
+    {
+      "id": "390054",
+      "status": "placed",
+      "amountUsd": "5.000000",
+      "orderId": "NULL",
+      "errorMessage": "CLOB order: unknown",
+      "createdAt": "2026-03-22 16:03:23"
+    },
+    {
+      "id": "390053",
+      "status": "placed",
+      "amountUsd": "5.000000",
+      "orderId": "NULL",
+      "errorMessage": "CLOB order: unknown",
+      "createdAt": "2026-03-22 16:03:16"
+    },
+    {
+      "id": "390052",
+      "status": "placed",
+      "amountUsd": "5.000000",
+      "orderId": "NULL",
+      "errorMessage": "CLOB order: unknown",
+      "createdAt": "2026-03-22 16:03:13"
+    },
+    {
+      "id": "390051",
+      "status": "placed",
+      "amountUsd": "5.000000",
+      "orderId": "NULL",
+      "errorMessage": "CLOB order: unknown",
+      "createdAt": "2026-03-22 16:03:03"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tstatus\tamountUsd\torderId\terrorMessage\tcreatedAt\n420005\tpending\t5.000000\tNULL\tNULL\t2026-03-29 18:01:34\n420004\tfailed\t5.000000\tNULL\tCLOB error: No orderID in response: {\"error\":\"service not ready\",\"status\":425}\t2026-03-29 18:01:29\n420003\tfailed\t5.000000\tNULL\tCLOB error: Proxy connection timed out\t2026-03-29 18:00:57\n420002\tplaced\t5.000000\tNULL\tCLOB order: 0x3c3b1fccb95e12805ea5787ea7ef0ae11c0580532d18d9352578ef385d6bf919\t2026-03-29 18:00:54\n420001\tplaced\t5.000000\tNULL\tCLOB order: 0xb27ddf33fac8ba7ecd290a79cde13d73daba799966e75e0420e7822a61309db4\t2026-03-29 18:00:50\n390060\tplaced\t5.000000\tNULL\tCLOB order: unknown\t2026-03-22 16:03:59\n390059\tplaced\t5.000000\tNULL\tCLOB order: unknown\t2026-03-22 16:03:50\n390058\tplaced\t5.000000\tNULL\tCLOB order: unknown\t2026-03-22 16:03:44\n390057\tplaced\t5.000000\tNULL\tCLOB order: unknown\t2026-03-22 16:03:37\n390056\tplaced\t5.000000\tNULL\tCLOB order: unknown\t2026-03-22 16:03:33\n390055\tplaced\t5.000000\tNULL\tCLOB order: unknown\t2026-03-22 16:03:28\n390054\tplaced\t5.000000\tNULL\tCLOB order: unknown\t2026-03-22 16:03:23\n390053\tplaced\t5.000000\tNULL\tCLOB order: unknown\t2026-03-22 16:03:16\n390052\tplaced\t5.000000\tNULL\tCLOB order: unknown\t2026-03-22 16:03:13\n390051\tplaced\t5.000000\tNULL\tCLOB order: unknown\t2026-03-22 16:03:03\n",
+  "stderr": "",
+  "execution_time_ms": 58
+}

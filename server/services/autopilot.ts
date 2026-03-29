@@ -35,7 +35,7 @@ function log(msg: string) {
  * 8. Sleep until next cycle
  */
 
-import { scanForCheapOutcomes, analyzeOrderbook } from "./gammaApi";
+import { scanForCheapOutcomes, analyzeOrderbook, lookupMarketResolution } from "./gammaApi";
 import { evaluateBatch } from "./aiEvaluator";
 import { placeLimitOrder, initializeClobClient, getClobStatus, checkOrderFills } from "./clobTrader";
 import type { TickSize as ClobTickSize } from "@polymarket/clob-client";
@@ -231,10 +231,26 @@ async function checkResolutions(): Promise<{ wins: number; losses: number; check
       const ob = await analyzeOrderbook(pos.tokenId);
       checked++;
 
-      // Skip resolution decisions when the API returned an error (404, timeout, etc.)
-      // An API error means we can't reliably determine the market state
+      // When CLOB returns an error (404 = market closed), try Gamma API for resolution
       if (ob.apiError) {
-        log(`[Autopilot] Skipping resolution for position ${pos.id} — API error (404/timeout)`);
+        try {
+          const resolution = await lookupMarketResolution(pos.marketId);
+          if (resolution && resolution.resolved) {
+            const won = resolution.winningOutcome === pos.outcome;
+            await db.resolvePosition(pos.id, won);
+            if (won) wins++; else losses++;
+            log(`[Autopilot] Resolved position ${pos.id} via Gamma: ${won ? 'WIN' : 'LOSS'} (winning=${resolution.winningOutcome}, ours=${pos.outcome})`);
+          } else if (resolution && resolution.closed) {
+            // Market closed but no clear winner — assume loss for tail-risk bets
+            await db.resolvePosition(pos.id, false);
+            losses++;
+            log(`[Autopilot] Resolved position ${pos.id} as LOSS (market closed, no clear winner)`);
+          } else {
+            log(`[Autopilot] Skipping position ${pos.id} — API error but market not resolved yet`);
+          }
+        } catch (gammaErr) {
+          log(`[Autopilot] Skipping position ${pos.id} — both CLOB and Gamma API failed`);
+        }
         continue;
       }
 
@@ -440,7 +456,8 @@ async function runCycle(): Promise<AutopilotRunStats> {
       limit: 500,
     });
 
-    const existingPositions = await db.getPositions();
+    // Only check open positions for dedup (exclude sold/closed phantom positions)
+    const existingPositions = await db.getPositions("open");
     const existingMarketIds = new Set(existingPositions.map(p => p.marketId));
 
     const buyable = approvedEvents.filter(e =>
@@ -524,10 +541,11 @@ async function runCycle(): Promise<AutopilotRunStats> {
             );
 
             if (result.success) {
-              await db.updateOrderStatus(orderId!, "placed", `CLOB order: ${result.orderId}`);
+              const orderStatus = result.matched ? "filled" : "placed";
+              await db.updateOrderStatus(orderId!, orderStatus, undefined, result.orderId);
               await db.createScanLog({
                 action: "clob_order",
-                details: `[${category}] ${event.question.slice(0, 50)}... @ $${price.toFixed(4)} x ${shares.toFixed(1)} ($${flatBetSize})`,
+                details: `[${category}] ${event.question.slice(0, 50)}... @ $${price.toFixed(4)} x ${shares.toFixed(1)} ($${flatBetSize}) orderId=${result.orderId || 'none'} status=${orderStatus}`,
               });
             } else {
               await db.updateOrderStatus(orderId!, "failed", `CLOB error: ${result.errorMsg}`);

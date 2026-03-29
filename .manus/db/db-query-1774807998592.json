@@ -1,0 +1,143 @@
+{
+  "query": "SELECT id, status, orderId, errorMessage, createdAt FROM orders WHERE createdAt >= '2026-03-29 18:06:00' ORDER BY id DESC;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3qjSsefs24zghQG.d5f38dec7f6c --database YZ9v9D6zNEEycYVBBKJ8og --execute SELECT id, status, orderId, errorMessage, createdAt FROM orders WHERE createdAt >= '2026-03-29 18:06:00' ORDER BY id DESC;",
+  "rows": [
+    {
+      "id": "420024",
+      "status": "pending",
+      "orderId": "NULL",
+      "errorMessage": "NULL",
+      "createdAt": "2026-03-29 18:12:05"
+    },
+    {
+      "id": "420023",
+      "status": "failed",
+      "orderId": "NULL",
+      "errorMessage": "CLOB error: Socket closed",
+      "createdAt": "2026-03-29 18:12:03"
+    },
+    {
+      "id": "420022",
+      "status": "filled",
+      "orderId": "0xee37913a07c5869d370dd4533f004a0c4bc832d929392db4ba09e30a0e842f92",
+      "errorMessage": "NULL",
+      "createdAt": "2026-03-29 18:11:57"
+    },
+    {
+      "id": "420021",
+      "status": "filled",
+      "orderId": "0xf99c43c8fd2a6df6bd7ed300500b332feaf3689a582aee3066924cc3b1e7bbb8",
+      "errorMessage": "NULL",
+      "createdAt": "2026-03-29 18:11:38"
+    },
+    {
+      "id": "420020",
+      "status": "filled",
+      "orderId": "0x38f89ac5d488523ecc381cbf1c30974f3d7df2fc3e18e3c0887525073b258b83",
+      "errorMessage": "NULL",
+      "createdAt": "2026-03-29 18:11:29"
+    },
+    {
+      "id": "420019",
+      "status": "filled",
+      "orderId": "0x5183bd18ece71c5acdf15588f590acd3cae2f29341255f98a4c8c105cb0a3dc4",
+      "errorMessage": "NULL",
+      "createdAt": "2026-03-29 18:11:26"
+    },
+    {
+      "id": "420018",
+      "status": "filled",
+      "orderId": "0x18380d2ab8c5b7fc778e3d530f47cf81b762808966c5a722802de4e88cd62da4",
+      "errorMessage": "NULL",
+      "createdAt": "2026-03-29 18:11:22"
+    },
+    {
+      "id": "420017",
+      "status": "filled",
+      "orderId": "0x543039749fbd65d935703e90efd23037b7837999ae164c546ad3eeb6bd69ca62",
+      "errorMessage": "NULL",
+      "createdAt": "2026-03-29 18:11:19"
+    },
+    {
+      "id": "420016",
+      "status": "filled",
+      "orderId": "0xed21ba7e4856055ff157afcfbd72301eb9a6dad737fd2b3224c9e800a82b711d",
+      "errorMessage": "NULL",
+      "createdAt": "2026-03-29 18:11:15"
+    },
+    {
+      "id": "420015",
+      "status": "filled",
+      "orderId": "0x046d0d3ea665a954c885f4da641fccde111fd547a61d27c9a1d7fb24f8a931a8",
+      "errorMessage": "NULL",
+      "createdAt": "2026-03-29 18:11:12"
+    },
+    {
+      "id": "420014",
+      "status": "filled",
+      "orderId": "0x61e7876ed51936130d6820b134f41b28919aa0462ac4892255acb5241fb8d50b",
+      "errorMessage": "NULL",
+      "createdAt": "2026-03-29 18:11:08"
+    },
+    {
+      "id": "420013",
+      "status": "filled",
+      "orderId": "0x4638f26f2681473b097c60e4d11d3bf2a8566a775574df60ab8f9d7b8a1f2091",
+      "errorMessage": "NULL",
+      "createdAt": "2026-03-29 18:11:05"
+    },
+    {
+      "id": "420012",
+      "status": "filled",
+      "orderId": "0x5bfe15e866dda0f0c1b0aa2d0d65d320f49cbc04e8b26f2a33e9e7cdab1df887",
+      "errorMessage": "NULL",
+      "createdAt": "2026-03-29 18:11:01"
+    },
+    {
+      "id": "420011",
+      "status": "failed",
+      "orderId": "NULL",
+      "errorMessage": "CLOB error: No orderID in response: {\"error\":\"socket hang up\"}",
+      "createdAt": "2026-03-29 18:10:54"
+    },
+    {
+      "id": "420010",
+      "status": "filled",
+      "orderId": "0x2e69c5e22078133ef2565ddde00e97a7c56dadab53592ed84ddce793638922b0",
+      "errorMessage": "NULL",
+      "createdAt": "2026-03-29 18:10:43"
+    },
+    {
+      "id": "420009",
+      "status": "filled",
+      "orderId": "0x6c93087455f8bb31e1da0c12adb6d5a9d8eaa33609d827959d31cd7fecec127c",
+      "errorMessage": "NULL",
+      "createdAt": "2026-03-29 18:10:37"
+    },
+    {
+      "id": "420008",
+      "status": "failed",
+      "orderId": "NULL",
+      "errorMessage": "CLOB error: No orderID in response: {\"error\":\"Client network socket disconnected before secure TLS connection was established\"}",
+      "createdAt": "2026-03-29 18:10:33"
+    },
+    {
+      "id": "420007",
+      "status": "filled",
+      "orderId": "0x050eecf75085d7f504dbc89c588f459b905bdf5cdb4501f24f9c63fb44e86a70",
+      "errorMessage": "NULL",
+      "createdAt": "2026-03-29 18:10:27"
+    },
+    {
+      "id": "420006",
+      "status": "filled",
+      "orderId": "0x1f715ee2f3102a973b57e20be10cfd1d89950cb3f1bf97c302fa9e330fd2d567",
+      "errorMessage": "NULL",
+      "createdAt": "2026-03-29 18:10:21"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tstatus\torderId\terrorMessage\tcreatedAt\n420024\tpending\tNULL\tNULL\t2026-03-29 18:12:05\n420023\tfailed\tNULL\tCLOB error: Socket closed\t2026-03-29 18:12:03\n420022\tfilled\t0xee37913a07c5869d370dd4533f004a0c4bc832d929392db4ba09e30a0e842f92\tNULL\t2026-03-29 18:11:57\n420021\tfilled\t0xf99c43c8fd2a6df6bd7ed300500b332feaf3689a582aee3066924cc3b1e7bbb8\tNULL\t2026-03-29 18:11:38\n420020\tfilled\t0x38f89ac5d488523ecc381cbf1c30974f3d7df2fc3e18e3c0887525073b258b83\tNULL\t2026-03-29 18:11:29\n420019\tfilled\t0x5183bd18ece71c5acdf15588f590acd3cae2f29341255f98a4c8c105cb0a3dc4\tNULL\t2026-03-29 18:11:26\n420018\tfilled\t0x18380d2ab8c5b7fc778e3d530f47cf81b762808966c5a722802de4e88cd62da4\tNULL\t2026-03-29 18:11:22\n420017\tfilled\t0x543039749fbd65d935703e90efd23037b7837999ae164c546ad3eeb6bd69ca62\tNULL\t2026-03-29 18:11:19\n420016\tfilled\t0xed21ba7e4856055ff157afcfbd72301eb9a6dad737fd2b3224c9e800a82b711d\tNULL\t2026-03-29 18:11:15\n420015\tfilled\t0x046d0d3ea665a954c885f4da641fccde111fd547a61d27c9a1d7fb24f8a931a8\tNULL\t2026-03-29 18:11:12\n420014\tfilled\t0x61e7876ed51936130d6820b134f41b28919aa0462ac4892255acb5241fb8d50b\tNULL\t2026-03-29 18:11:08\n420013\tfilled\t0x4638f26f2681473b097c60e4d11d3bf2a8566a775574df60ab8f9d7b8a1f2091\tNULL\t2026-03-29 18:11:05\n420012\tfilled\t0x5bfe15e866dda0f0c1b0aa2d0d65d320f49cbc04e8b26f2a33e9e7cdab1df887\tNULL\t2026-03-29 18:11:01\n420011\tfailed\tNULL\tCLOB error: No orderID in response: {\"error\":\"socket hang up\"}\t2026-03-29 18:10:54\n420010\tfilled\t0x2e69c5e22078133ef2565ddde00e97a7c56dadab53592ed84ddce793638922b0\tNULL\t2026-03-29 18:10:43\n420009\tfilled\t0x6c93087455f8bb31e1da0c12adb6d5a9d8eaa33609d827959d31cd7fecec127c\tNULL\t2026-03-29 18:10:37\n420008\tfailed\tNULL\tCLOB error: No orderID in response: {\"error\":\"Client network socket disconnected before secure TLS connection was established\"}\t2026-03-29 18:10:33\n420007\tfilled\t0x050eecf75085d7f504dbc89c588f459b905bdf5cdb4501f24f9c63fb44e86a70\tNULL\t2026-03-29 18:10:27\n420006\tfilled\t0x1f715ee2f3102a973b57e20be10cfd1d89950cb3f1bf97c302fa9e330fd2d567\tNULL\t2026-03-29 18:10:21\n",
+  "stderr": "",
+  "execution_time_ms": 54
+}

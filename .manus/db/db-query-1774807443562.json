@@ -1,0 +1,9 @@
+{
+  "query": "\nUPDATE orders \nSET orderId = SUBSTRING(errorMessage, 13) \nWHERE status = 'placed' \nAND orderId IS NULL \nAND errorMessage LIKE 'CLOB order: 0x%';\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3qjSsefs24zghQG.d5f38dec7f6c --database YZ9v9D6zNEEycYVBBKJ8og --execute \nUPDATE orders \nSET orderId = SUBSTRING(errorMessage, 13) \nWHERE status = 'placed' \nAND orderId IS NULL \nAND errorMessage LIKE 'CLOB order: 0x%';\n",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 64
+}

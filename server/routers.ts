@@ -321,7 +321,8 @@ export const appRouter = router({
           throw new Error(`CLOB order failed: ${clobResult.errorMsg}`);
         }
 
-        await db.updateOrderStatus(orderId!, "placed", `CLOB order: ${clobResult.orderId}`);
+        const orderStatus = clobResult.matched ? "filled" : "placed";
+        await db.updateOrderStatus(orderId!, orderStatus, undefined, clobResult.orderId);
         await db.createPosition({
           scannedEventId: event.id,
           marketId: event.marketId,

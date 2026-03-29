@@ -1,0 +1,52 @@
+{
+  "query": "\nSELECT 'positions' as tbl, status, COUNT(*) as cnt, SUM(costBasis) as total FROM positions GROUP BY status\nUNION ALL\nSELECT 'orders', status, COUNT(*), SUM(amountUsd) FROM orders GROUP BY status;\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3qjSsefs24zghQG.d5f38dec7f6c --database YZ9v9D6zNEEycYVBBKJ8og --execute \nSELECT 'positions' as tbl, status, COUNT(*) as cnt, SUM(costBasis) as total FROM positions GROUP BY status\nUNION ALL\nSELECT 'orders', status, COUNT(*), SUM(amountUsd) FROM orders GROUP BY status;\n",
+  "rows": [
+    {
+      "tbl": "orders",
+      "status": "cancelled",
+      "cnt": "1",
+      "total": "9.996000"
+    },
+    {
+      "tbl": "orders",
+      "status": "filled",
+      "cnt": "18",
+      "total": "99.946000"
+    },
+    {
+      "tbl": "orders",
+      "status": "failed",
+      "cnt": "81",
+      "total": "405.000000"
+    },
+    {
+      "tbl": "orders",
+      "status": "placed",
+      "cnt": "321",
+      "total": "1605.000000"
+    },
+    {
+      "tbl": "positions",
+      "status": "open",
+      "cnt": "89",
+      "total": "476.417230"
+    },
+    {
+      "tbl": "positions",
+      "status": "sold",
+      "cnt": "276",
+      "total": "0.000000"
+    },
+    {
+      "tbl": "positions",
+      "status": "resolved_loss",
+      "cnt": "53",
+      "total": "194.997000"
+    }
+  ],
+  "messages": [],
+  "stdout": "tbl\tstatus\tcnt\ttotal\norders\tcancelled\t1\t9.996000\norders\tfilled\t18\t99.946000\norders\tfailed\t81\t405.000000\norders\tplaced\t321\t1605.000000\npositions\topen\t89\t476.417230\npositions\tsold\t276\t0.000000\npositions\tresolved_loss\t53\t194.997000\n",
+  "stderr": "",
+  "execution_time_ms": 52
+}

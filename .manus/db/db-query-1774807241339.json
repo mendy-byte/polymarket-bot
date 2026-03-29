@@ -1,0 +1,80 @@
+{
+  "query": "\nSELECT id, status, amountUsd, orderId, createdAt FROM orders ORDER BY id DESC LIMIT 10;\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3qjSsefs24zghQG.d5f38dec7f6c --database YZ9v9D6zNEEycYVBBKJ8og --execute \nSELECT id, status, amountUsd, orderId, createdAt FROM orders ORDER BY id DESC LIMIT 10;\n",
+  "rows": [
+    {
+      "id": "390060",
+      "status": "placed",
+      "amountUsd": "5.000000",
+      "orderId": "NULL",
+      "createdAt": "2026-03-22 16:03:59"
+    },
+    {
+      "id": "390059",
+      "status": "placed",
+      "amountUsd": "5.000000",
+      "orderId": "NULL",
+      "createdAt": "2026-03-22 16:03:50"
+    },
+    {
+      "id": "390058",
+      "status": "placed",
+      "amountUsd": "5.000000",
+      "orderId": "NULL",
+      "createdAt": "2026-03-22 16:03:44"
+    },
+    {
+      "id": "390057",
+      "status": "placed",
+      "amountUsd": "5.000000",
+      "orderId": "NULL",
+      "createdAt": "2026-03-22 16:03:37"
+    },
+    {
+      "id": "390056",
+      "status": "placed",
+      "amountUsd": "5.000000",
+      "orderId": "NULL",
+      "createdAt": "2026-03-22 16:03:33"
+    },
+    {
+      "id": "390055",
+      "status": "placed",
+      "amountUsd": "5.000000",
+      "orderId": "NULL",
+      "createdAt": "2026-03-22 16:03:28"
+    },
+    {
+      "id": "390054",
+      "status": "placed",
+      "amountUsd": "5.000000",
+      "orderId": "NULL",
+      "createdAt": "2026-03-22 16:03:23"
+    },
+    {
+      "id": "390053",
+      "status": "placed",
+      "amountUsd": "5.000000",
+      "orderId": "NULL",
+      "createdAt": "2026-03-22 16:03:16"
+    },
+    {
+      "id": "390052",
+      "status": "placed",
+      "amountUsd": "5.000000",
+      "orderId": "NULL",
+      "createdAt": "2026-03-22 16:03:13"
+    },
+    {
+      "id": "390051",
+      "status": "placed",
+      "amountUsd": "5.000000",
+      "orderId": "NULL",
+      "createdAt": "2026-03-22 16:03:03"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tstatus\tamountUsd\torderId\tcreatedAt\n390060\tplaced\t5.000000\tNULL\t2026-03-22 16:03:59\n390059\tplaced\t5.000000\tNULL\t2026-03-22 16:03:50\n390058\tplaced\t5.000000\tNULL\t2026-03-22 16:03:44\n390057\tplaced\t5.000000\tNULL\t2026-03-22 16:03:37\n390056\tplaced\t5.000000\tNULL\t2026-03-22 16:03:33\n390055\tplaced\t5.000000\tNULL\t2026-03-22 16:03:28\n390054\tplaced\t5.000000\tNULL\t2026-03-22 16:03:23\n390053\tplaced\t5.000000\tNULL\t2026-03-22 16:03:16\n390052\tplaced\t5.000000\tNULL\t2026-03-22 16:03:13\n390051\tplaced\t5.000000\tNULL\t2026-03-22 16:03:03\n",
+  "stderr": "",
+  "execution_time_ms": 53
+}

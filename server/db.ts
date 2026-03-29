@@ -199,11 +199,12 @@ export async function getOrders(status?: string) {
   return db.select().from(orders).orderBy(desc(orders.createdAt));
 }
 
-export async function updateOrderStatus(id: number, status: string, errorMessage?: string) {
+export async function updateOrderStatus(id: number, status: string, errorMessage?: string, clobOrderId?: string) {
   const db = await getDb();
   if (!db) return;
   const update: Record<string, any> = { status: status as any };
   if (errorMessage) update.errorMessage = errorMessage;
+  if (clobOrderId) update.orderId = clobOrderId;
   if (status === "filled") update.filledAt = new Date();
   await db.update(orders).set(update).where(eq(orders.id, id));
 }

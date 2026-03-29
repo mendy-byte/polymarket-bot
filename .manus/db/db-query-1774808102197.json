@@ -1,0 +1,16 @@
+{
+  "query": "SELECT id, marketId, question, outcome FROM positions WHERE id = 20;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3qjSsefs24zghQG.d5f38dec7f6c --database YZ9v9D6zNEEycYVBBKJ8og --execute SELECT id, marketId, question, outcome FROM positions WHERE id = 20;",
+  "rows": [
+    {
+      "id": "20",
+      "marketId": "654412",
+      "question": "Will the Fed decrease interest rates by 50+ bps after the March 2026 meeting?",
+      "outcome": "Yes"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tmarketId\tquestion\toutcome\n20\t654412\tWill the Fed decrease interest rates by 50+ bps after the March 2026 meeting?\tYes\n",
+  "stderr": "",
+  "execution_time_ms": 58
+}

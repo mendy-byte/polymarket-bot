@@ -1,0 +1,58 @@
+{
+  "query": "\nSELECT 'positions' as tbl, status, COUNT(*) as cnt, ROUND(SUM(costBasis), 2) as total FROM positions GROUP BY status\nUNION ALL\nSELECT 'orders', status, COUNT(*), ROUND(SUM(amountUsd), 2) FROM orders GROUP BY status\nORDER BY tbl, status;\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3qjSsefs24zghQG.d5f38dec7f6c --database YZ9v9D6zNEEycYVBBKJ8og --execute \nSELECT 'positions' as tbl, status, COUNT(*) as cnt, ROUND(SUM(costBasis), 2) as total FROM positions GROUP BY status\nUNION ALL\nSELECT 'orders', status, COUNT(*), ROUND(SUM(amountUsd), 2) FROM orders GROUP BY status\nORDER BY tbl, status;\n",
+  "rows": [
+    {
+      "tbl": "orders",
+      "status": "cancelled",
+      "cnt": "1",
+      "total": "10.00"
+    },
+    {
+      "tbl": "orders",
+      "status": "failed",
+      "cnt": "89",
+      "total": "445.00"
+    },
+    {
+      "tbl": "orders",
+      "status": "filled",
+      "cnt": "68",
+      "total": "349.95"
+    },
+    {
+      "tbl": "orders",
+      "status": "pending",
+      "cnt": "2",
+      "total": "10.00"
+    },
+    {
+      "tbl": "orders",
+      "status": "placed",
+      "cnt": "322",
+      "total": "1610.00"
+    },
+    {
+      "tbl": "positions",
+      "status": "open",
+      "cnt": "127",
+      "total": "680.62"
+    },
+    {
+      "tbl": "positions",
+      "status": "resolved_loss",
+      "cnt": "66",
+      "total": "245.79"
+    },
+    {
+      "tbl": "positions",
+      "status": "sold",
+      "cnt": "276",
+      "total": "0.00"
+    }
+  ],
+  "messages": [],
+  "stdout": "tbl\tstatus\tcnt\ttotal\norders\tcancelled\t1\t10.00\norders\tfailed\t89\t445.00\norders\tfilled\t68\t349.95\norders\tpending\t2\t10.00\norders\tplaced\t322\t1610.00\npositions\topen\t127\t680.62\npositions\tresolved_loss\t66\t245.79\npositions\tsold\t276\t0.00\n",
+  "stderr": "",
+  "execution_time_ms": 53
+}
