@@ -85,3 +85,6 @@
 - [x] Add Gamma API market resolution lookup: resolve stale 404 positions by checking Gamma API for closed/resolved status
 - [x] Resolve 13 stale positions via Gamma API fallback (Fed rate, Academy Awards, PLAYERS Championship, etc.)
 - [x] Verify live order cycle: 15+ orders filled with proper orderId capture in single cycle
+- [x] Migrate SOCKS5 proxy from Amsterdam (152.42.139.184) to Frankfurt (165.227.132.17)
+- [x] Create new Frankfurt droplet via DigitalOcean API with auto-setup user-data script
+- [x] Destroy old Amsterdam droplet
