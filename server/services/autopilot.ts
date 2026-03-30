@@ -520,12 +520,25 @@ async function runCycle(): Promise<AutopilotRunStats> {
     const cycleCategories = new Map<string, number>();
     let obSkipCount = 0;
 
+    // Diagnostic: log first event details
+    if (deduplicated.length > 0) {
+      const first = deduplicated[0];
+      log(`[Autopilot] DIAG: flatBetSize=${flatBetSize}, maxOrders=${maxOrdersPerCycle}, dailyBudget=${dailyBuyBudget}, dailySpent=${currentDailySpent}, totalCap=${maxTotalCapital}, totalDeployed=${currentTotalDeployed}`);
+      log(`[Autopilot] DIAG: first event: ${first.question?.slice(0, 50)}... cat=${first.category} tokenId=${first.tokenId ? 'yes' : 'NO'} price=${first.price}`);
+    }
+
     for (const event of deduplicated) {
-      if (ordersThisCycle >= maxOrdersPerCycle) break;
+      if (ordersThisCycle >= maxOrdersPerCycle) {
+        log(`[Autopilot] DIAG: maxOrders break at ${ordersThisCycle}`);
+        break;
+      }
 
       const currentRemainingDaily = dailyBuyBudget - currentDailySpent;
       const currentRemainingCapital = maxTotalCapital - currentTotalDeployed;
-      if (currentRemainingDaily < flatBetSize || currentRemainingCapital < flatBetSize) break;
+      if (currentRemainingDaily < flatBetSize || currentRemainingCapital < flatBetSize) {
+        log(`[Autopilot] DIAG: budget break - remainDaily=${currentRemainingDaily}, remainCap=${currentRemainingCapital}, flatBet=${flatBetSize}`);
+        break;
+      }
 
       const category = event.category || "other";
       if (!canBuyInCategory(category, flatBetSize, categoryUsage, currentTotalDeployed, maxCategoryPercent)) {
