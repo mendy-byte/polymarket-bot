@@ -547,7 +547,13 @@ async function runCycle(): Promise<AutopilotRunStats> {
       }
 
       try {
+        if (ordersThisCycle + obSkipCount < 3) {
+          log(`[Autopilot] TRACE[${ordersThisCycle + obSkipCount}]: tokenId=${event.tokenId?.slice(0, 20)}... cat=${category} price=${event.price}`);
+        }
         const ob = await analyzeOrderbook(event.tokenId!);
+        if (ordersThisCycle + obSkipCount < 3) {
+          log(`[Autopilot] TRACE[${ordersThisCycle + obSkipCount}]: ob.fillable=${ob.fillableAtPrice} bestAsk=${ob.bestAsk} bestBid=${ob.bestBid} apiErr=${ob.apiError} askDepth=${ob.askDepth}`);
+        }
         if (!ob.fillableAtPrice || ob.bestAsk === null || ob.bestAsk > parseFloat(event.price) * 2) {
           obSkipCount++;
           if (obSkipCount <= 5) {
