@@ -518,6 +518,7 @@ async function runCycle(): Promise<AutopilotRunStats> {
     const maxOrdersPerCycle = parseInt(configMap.get("autopilotMaxOrders") || "50");
     let ordersThisCycle = 0;
     const cycleCategories = new Map<string, number>();
+    let obSkipCount = 0;
 
     for (const event of deduplicated) {
       if (ordersThisCycle >= maxOrdersPerCycle) break;
@@ -535,8 +536,8 @@ async function runCycle(): Promise<AutopilotRunStats> {
       try {
         const ob = await analyzeOrderbook(event.tokenId!);
         if (!ob.fillableAtPrice || ob.bestAsk === null || ob.bestAsk > parseFloat(event.price) * 2) {
-          if (ordersThisCycle === 0 && stats.ordersPlaced === 0) {
-            // Log first few skips to diagnose issues
+          obSkipCount++;
+          if (obSkipCount <= 5) {
             const reason = ob.apiError ? 'API error' : ob.bestAsk === null ? 'no bestAsk' : !ob.fillableAtPrice ? 'not fillable' : `bestAsk ${ob.bestAsk} > 2x price ${parseFloat(event.price) * 2}`;
             log(`[Autopilot] Orderbook skip [${category}]: ${event.question.slice(0, 60)}... reason=${reason} bestAsk=${ob.bestAsk} bestBid=${ob.bestBid}`);
           }
@@ -636,6 +637,12 @@ async function runCycle(): Promise<AutopilotRunStats> {
 
     stats.categoryBreakdown = Object.fromEntries(cycleCategories);
     stats.categoriesUsed = cycleCategories.size;
+    if (obSkipCount > 0) {
+      log(`[Autopilot] Total orderbook skips: ${obSkipCount}/${deduplicated.length} candidates`);
+    }
+    if (ordersThisCycle === 0 && deduplicated.length > 0) {
+      log(`[Autopilot] WARNING: 0 orders placed from ${deduplicated.length} candidates`);
+    }
 
     // ===== STEP 7: Check fill status of existing orders =====
     log("[Autopilot] Step 6: Checking order fill status...");
