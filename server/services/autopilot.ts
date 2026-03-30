@@ -563,6 +563,7 @@ async function runCycle(): Promise<AutopilotRunStats> {
           continue;
         }
 
+        log(`[Autopilot] PLACING: ${event.question.slice(0, 40)}... bestAsk=${ob.bestAsk} shares=${(flatBetSize / ob.bestAsk).toFixed(1)}`);
         const price = ob.bestAsk;
         const shares = flatBetSize / price;
 
@@ -606,11 +607,13 @@ async function runCycle(): Promise<AutopilotRunStats> {
             } else {
               await db.updateOrderStatus(orderId!, "failed", `CLOB error: ${result.errorMsg}`);
               stats.errors.push(`CLOB fail [${category}]: ${result.errorMsg}`);
+              log(`[Autopilot] CLOB FAIL: ${result.errorMsg}`);
               continue;
             }
           } catch (clobErr: any) {
             await db.updateOrderStatus(orderId!, "failed", `CLOB exception: ${clobErr.message}`);
             stats.errors.push(`CLOB exception [${category}]: ${clobErr.message}`);
+            log(`[Autopilot] CLOB EXCEPTION: ${clobErr.message}`);
             continue;
           }
         }
@@ -661,6 +664,9 @@ async function runCycle(): Promise<AutopilotRunStats> {
     }
     if (ordersThisCycle === 0 && deduplicated.length > 0) {
       log(`[Autopilot] WARNING: 0 orders placed from ${deduplicated.length} candidates`);
+    }
+    if (stats.errors.length > 0) {
+      log(`[Autopilot] ERRORS (${stats.errors.length}): ${stats.errors.slice(0, 5).join(' | ')}`);
     }
 
     // ===== STEP 7: Check fill status of existing orders =====

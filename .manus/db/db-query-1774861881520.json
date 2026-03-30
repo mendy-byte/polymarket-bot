@@ -1,0 +1,50 @@
+{
+  "query": "SELECT id, action, details, errors, duration, createdAt FROM scan_logs WHERE action = 'autopilot' ORDER BY id DESC LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3qjSsefs24zghQG.d5f38dec7f6c --database YZ9v9D6zNEEycYVBBKJ8og --execute SELECT id, action, details, errors, duration, createdAt FROM scan_logs WHERE action = 'autopilot' ORDER BY id DESC LIMIT 5;",
+  "rows": [
+    {
+      "id": "1020009",
+      "action": "autopilot",
+      "details": "Scanned: 0 cheap outcomes | New: 0 | AI: 0 evaluated, 0 rejected | Orders: 0 ($0.00) across 0 categories | Resolutions: 0W/0L | Errors: Daily budget exhausted: $300.00 / $300",
+      "errors": "1",
+      "duration": "13684",
+      "createdAt": "2026-03-29 20:52:39"
+    },
+    {
+      "id": "1020008",
+      "action": "autopilot",
+      "details": "Scanned: 0 cheap outcomes | New: 0 | AI: 0 evaluated, 0 rejected | Orders: 0 ($0.00) across 0 categories | Resolutions: 0W/0L | Errors: Daily budget exhausted: $300.00 / $300",
+      "errors": "1",
+      "duration": "13576",
+      "createdAt": "2026-03-29 20:52:04"
+    },
+    {
+      "id": "1020007",
+      "action": "autopilot",
+      "details": "Scanned: 0 cheap outcomes | New: 0 | AI: 0 evaluated, 0 rejected | Orders: 0 ($0.00) across 0 categories | Resolutions: 0W/0L | Errors: Daily budget exhausted: $300.00 / $300",
+      "errors": "1",
+      "duration": "13716",
+      "createdAt": "2026-03-29 20:51:34"
+    },
+    {
+      "id": "1020006",
+      "action": "autopilot",
+      "details": "Scanned: 0 cheap outcomes | New: 0 | AI: 0 evaluated, 0 rejected | Orders: 0 ($0.00) across 0 categories | Resolutions: 0W/0L | Errors: Daily budget exhausted: $300.00 / $300",
+      "errors": "1",
+      "duration": "320400",
+      "createdAt": "2026-03-29 20:34:22"
+    },
+    {
+      "id": "1020004",
+      "action": "autopilot",
+      "details": "Scanned: 0 cheap outcomes | New: 0 | AI: 0 evaluated, 0 rejected | Orders: 0 ($0.00) across 0 categories | Resolutions: 0W/1L | Errors: Daily budget exhausted: $300.00 / $300",
+      "errors": "1",
+      "duration": "14116",
+      "createdAt": "2026-03-29 20:27:47"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\taction\tdetails\terrors\tduration\tcreatedAt\n1020009\tautopilot\tScanned: 0 cheap outcomes | New: 0 | AI: 0 evaluated, 0 rejected | Orders: 0 ($0.00) across 0 categories | Resolutions: 0W/0L | Errors: Daily budget exhausted: $300.00 / $300\t1\t13684\t2026-03-29 20:52:39\n1020008\tautopilot\tScanned: 0 cheap outcomes | New: 0 | AI: 0 evaluated, 0 rejected | Orders: 0 ($0.00) across 0 categories | Resolutions: 0W/0L | Errors: Daily budget exhausted: $300.00 / $300\t1\t13576\t2026-03-29 20:52:04\n1020007\tautopilot\tScanned: 0 cheap outcomes | New: 0 | AI: 0 evaluated, 0 rejected | Orders: 0 ($0.00) across 0 categories | Resolutions: 0W/0L | Errors: Daily budget exhausted: $300.00 / $300\t1\t13716\t2026-03-29 20:51:34\n1020006\tautopilot\tScanned: 0 cheap outcomes | New: 0 | AI: 0 evaluated, 0 rejected | Orders: 0 ($0.00) across 0 categories | Resolutions: 0W/0L | Errors: Daily budget exhausted: $300.00 / $300\t1\t320400\t2026-03-29 20:34:22\n1020004\tautopilot\tScanned: 0 cheap outcomes | New: 0 | AI: 0 evaluated, 0 rejected | Orders: 0 ($0.00) across 0 categories | Resolutions: 0W/1L | Errors: Daily budget exhausted: $300.00 / $300\t1\t14116\t2026-03-29 20:27:47\n",
+  "stderr": "",
+  "execution_time_ms": 708
+}
