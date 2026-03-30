@@ -535,6 +535,11 @@ async function runCycle(): Promise<AutopilotRunStats> {
       try {
         const ob = await analyzeOrderbook(event.tokenId!);
         if (!ob.fillableAtPrice || ob.bestAsk === null || ob.bestAsk > parseFloat(event.price) * 2) {
+          if (ordersThisCycle === 0 && stats.ordersPlaced === 0) {
+            // Log first few skips to diagnose issues
+            const reason = ob.apiError ? 'API error' : ob.bestAsk === null ? 'no bestAsk' : !ob.fillableAtPrice ? 'not fillable' : `bestAsk ${ob.bestAsk} > 2x price ${parseFloat(event.price) * 2}`;
+            log(`[Autopilot] Orderbook skip [${category}]: ${event.question.slice(0, 60)}... reason=${reason} bestAsk=${ob.bestAsk} bestBid=${ob.bestBid}`);
+          }
           continue;
         }
 

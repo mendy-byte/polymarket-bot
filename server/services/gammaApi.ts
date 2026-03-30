@@ -3,8 +3,11 @@
  * Handles all communication with the public Gamma API for market discovery.
  */
 
+import { getProxiedAxios } from "./proxySetup";
+
 const GAMMA_BASE = "https://gamma-api.polymarket.com";
 const CLOB_BASE = "https://clob.polymarket.com";
+
 
 interface RawMarket {
   id: string;
@@ -96,9 +99,18 @@ export async function fetchActiveMarkets(limit = 100, offset = 0): Promise<RawMa
   return fetchJson<RawMarket[]>(url);
 }
 
-/** Fetch orderbook for a specific token */
+/** Fetch orderbook for a specific token.
+ * Uses the proxied axios instance for CLOB URLs (geo-restricted),
+ * falling back to plain fetch if no proxy is available.
+ */
 export async function fetchOrderbook(tokenId: string): Promise<OrderbookData> {
   const url = `${CLOB_BASE}/book?token_id=${tokenId}`;
+  const proxiedAxios = getProxiedAxios();
+  if (proxiedAxios) {
+    const resp = await proxiedAxios.get<OrderbookData>(url, { timeout: 15000 });
+    return resp.data;
+  }
+  // Fallback to plain fetch (works on non-geo-blocked servers)
   return fetchJson<OrderbookData>(url);
 }
 
