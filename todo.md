@@ -105,3 +105,5 @@
 - [x] Show Real P&L on dashboard (starting capital minus current wallet balance)
 - [x] Set up Telegram alert secrets (TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID)
 - [x] Wire Telegram alerts into autopilot cycle events
+- [ ] Set up nginx reverse proxy on Frankfurt droplet to expose dashboard at http://165.227.132.17
+- [ ] Add simple password-based login bypass for standalone droplet deployment

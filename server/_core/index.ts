@@ -7,6 +7,10 @@ import { registerOAuthRoutes } from "./oauth";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
+import { sdk } from "./sdk";
+import { COOKIE_NAME } from "@shared/const";
+import { getSessionCookieOptions } from "./cookies";
+import * as db from "../db";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -35,6 +39,38 @@ async function startServer() {
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
   // OAuth callback under /api/oauth/callback
   registerOAuthRoutes(app);
+
+  // Simple password login for standalone deployment
+  app.post("/api/password-login", async (req, res) => {
+    try {
+      const { password } = req.body;
+      const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "Mendy5271";
+      if (password !== ADMIN_PASSWORD) {
+        return res.status(401).json({ error: "Invalid password" });
+      }
+      // Create or find the owner user
+      const ownerOpenId = process.env.OWNER_OPEN_ID || "standalone-owner";
+      const ownerName = process.env.OWNER_NAME || "Owner";
+      await db.upsertUser({
+        openId: ownerOpenId,
+        name: ownerName,
+        role: "admin",
+        lastSignedIn: new Date(),
+      });
+      // Create session JWT
+      const token = await sdk.createSessionToken(ownerOpenId, { name: ownerName });
+      const cookieOptions = getSessionCookieOptions(req);
+      res.cookie(COOKIE_NAME, token, {
+        ...cookieOptions,
+        maxAge: 365 * 24 * 60 * 60 * 1000, // 1 year
+      });
+      return res.json({ success: true });
+    } catch (err: any) {
+      console.error("[PasswordLogin] Error:", err.message);
+      return res.status(500).json({ error: "Login failed" });
+    }
+  });
+
   // tRPC API
   app.use(
     "/api/trpc",

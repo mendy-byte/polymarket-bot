@@ -19,7 +19,6 @@ import {
   SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { getLoginUrl } from "@/const";
 import { useIsMobile } from "@/hooks/useMobile";
 import {
   LayoutDashboard,
@@ -35,6 +34,7 @@ import {
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { DashboardLayoutSkeleton } from "./DashboardLayoutSkeleton";
+import { PasswordLoginScreen } from "./PasswordLoginScreen";
 import { Button } from "./ui/button";
 
 const menuItems = [
@@ -72,32 +72,7 @@ export default function DashboardLayout({
   }
 
   if (!user) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-background">
-        <div className="flex flex-col items-center gap-8 p-8 max-w-md w-full">
-          <div className="flex flex-col items-center gap-4">
-            <div className="h-14 w-14 rounded-xl bg-primary/10 flex items-center justify-center">
-              <Activity className="h-7 w-7 text-primary" />
-            </div>
-            <h1 className="text-2xl font-semibold tracking-tight text-center text-foreground">
-              Polymarket Tail-Risk Bot
-            </h1>
-            <p className="text-sm text-muted-foreground text-center max-w-sm">
-              Autonomous prediction market bot exploiting mispriced tail-risk events. Sign in to access the dashboard.
-            </p>
-          </div>
-          <Button
-            onClick={() => {
-              window.location.href = getLoginUrl();
-            }}
-            size="lg"
-            className="w-full shadow-lg hover:shadow-xl transition-all"
-          >
-            Sign in
-          </Button>
-        </div>
-      </div>
-    );
+    return <PasswordLoginScreen onSuccess={() => window.location.reload()} />;
   }
 
   return (
