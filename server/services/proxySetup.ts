@@ -5,9 +5,9 @@
  * Read-only endpoints (health, time, markets, orderbooks) work without proxy,
  * but ORDER PLACEMENT requires routing through a non-restricted region.
  * 
- * IMPORTANT: We do NOT set global axios defaults to avoid routing ALL traffic
- * (including gammaApi fetch() calls) through the proxy. Instead, we export
- * a dedicated proxied axios instance that the CLOB client uses for trading.
+ * When SOCKS5_PROXY_URL is set, ALL axios traffic (used by the CLOB client
+ * internally) is routed through the proxy. Native fetch() calls (used by
+ * gammaApi for read-only data) remain direct.
  * 
  * We also monkey-patch JSON.stringify to handle circular references
  * caused by the SocksProxyAgent being attached to axios config objects.
@@ -69,10 +69,14 @@ async function testProxyConnection(socksUrl: string): Promise<boolean> {
 
 /**
  * Clear proxy state (use direct connection).
- * Only suitable for read-only operations — trading will be geo-blocked.
+ * Only suitable for read-only operations — trading will be geo-blocked
+ * unless the server is in an allowed region.
  */
 export function disableProxy(): void {
-  // Do NOT touch axios.defaults — keep global traffic direct
+  // Reset global axios defaults
+  axios.defaults.httpAgent = undefined;
+  axios.defaults.httpsAgent = undefined;
+  axios.defaults.proxy = undefined;
   isProxyActive = false;
   connectionMode = "direct";
   proxyAgent = null;
@@ -80,14 +84,15 @@ export function disableProxy(): void {
 }
 
 /**
- * Enable SOCKS5 proxy — creates a dedicated proxied axios instance.
- * Does NOT modify global axios defaults to avoid routing fetch() calls through proxy.
+ * Enable SOCKS5 proxy — sets global axios defaults so the CLOB client
+ * (which uses axios internally) routes all requests through the proxy.
+ * Also creates a dedicated proxied axios instance for explicit use.
  */
 function enableProxy(socksUrl: string): boolean {
   try {
     proxyAgent = new SocksProxyAgent(socksUrl);
     
-    // Set global defaults so the CLOB client (which uses axios internally) routes through proxy
+    // Set global defaults so the CLOB client routes through proxy
     axios.defaults.httpAgent = proxyAgent;
     axios.defaults.httpsAgent = proxyAgent;
     axios.defaults.proxy = false;
@@ -101,7 +106,7 @@ function enableProxy(socksUrl: string): boolean {
     
     isProxyActive = true;
     connectionMode = "proxy";
-    console.log(`[Proxy] SOCKS5 proxy enabled: ${socksUrl}`);
+    console.log(`[Proxy] SOCKS5 proxy enabled: ${socksUrl.replace(/\/\/.*@/, '//***@')}`);
     return true;
   } catch (err: any) {
     console.error(`[Proxy] Failed to enable: ${err.message}`);
@@ -111,52 +116,46 @@ function enableProxy(socksUrl: string): boolean {
 
 /**
  * Initialize connection with retry logic.
- * Proxy is REQUIRED for trading — direct connection gets geo-blocked on order placement.
+ * 
+ * If SOCKS5_PROXY_URL is set: use proxy (required for geo-blocked regions).
+ * If not set: use direct connection (only works in allowed regions).
  * 
  * Retry strategy: try proxy up to 3 times with increasing delays.
- * If proxy fails all retries, fall back to direct (read-only mode — scanning works, trading won't).
+ * If proxy fails all retries, fall back to direct (scanning works, trading may not).
  */
 export async function initializeConnection(): Promise<"proxy" | "direct" | "failed"> {
-  const socksUrl = process.env.SOCKS5_PROXY_URL || null; // null = try direct first (Frankfurt usually works direct)
+  const socksUrl = process.env.SOCKS5_PROXY_URL || null;
   const MAX_RETRIES = 3;
   const RETRY_DELAYS = [2000, 5000, 10000]; // 2s, 5s, 10s
 
-  // Frankfurt optimization: try direct connection first
+  // No proxy configured — use direct connection
   if (!socksUrl) {
-    console.log("[Connection] No proxy configured — trying direct connection (Frankfurt)...");
+    console.log("[Connection] No SOCKS5_PROXY_URL configured — using direct connection");
+    console.log("[Connection] ⚠️ Trading may be geo-blocked without a proxy. Set SOCKS5_PROXY_URL if orders fail.");
     try {
       const directResp = await axios.get(`${CLOB_HOST}/time`, { timeout: 10000, proxy: false });
       if (directResp.status === 200) {
         disableProxy();
         connectionMode = "direct";
-        console.log("[Connection] Direct connection works — trading via Frankfurt IP");
+        console.log("[Connection] Direct connection to CLOB API works");
         return "direct";
       }
     } catch {
-      console.log("[Connection] Direct connection failed — will try proxy fallback");
+      console.warn("[Connection] Direct connection to CLOB API failed");
     }
-    // Direct failed, try default proxy as fallback
-    const fallbackProxy = "socks5://polybot:pr0xyS3cure2026@165.227.132.17:1080";
-    const proxyWorks = await testProxyConnection(fallbackProxy);
-    if (proxyWorks) {
-      enableProxy(fallbackProxy);
-      console.log("[Connection] Proxy fallback connection established — trading enabled");
-      return "proxy";
-    }
-    console.warn("[Connection] ⚠️ Both direct and proxy failed — scanning only");
     disableProxy();
     connectionMode = "direct";
     return "direct";
   }
 
-  // Explicit proxy configured — try with retries (required for trading)
+  // Proxy configured — try with retries
   for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
-    console.log(`[Connection] Testing proxy connection (attempt ${attempt + 1}/${MAX_RETRIES})...`);
+    console.log(`[Connection] Testing SOCKS5 proxy (attempt ${attempt + 1}/${MAX_RETRIES})...`);
     const proxyWorks = await testProxyConnection(socksUrl);
     
     if (proxyWorks) {
       enableProxy(socksUrl);
-      console.log("[Connection] Proxy connection established — trading enabled");
+      console.log("[Connection] ✅ Proxy connection established — trading enabled");
       return "proxy";
     }
 
@@ -167,10 +166,9 @@ export async function initializeConnection(): Promise<"proxy" | "direct" | "fail
     }
   }
 
-  // Proxy failed all retries — fall back to direct (read-only)
-  console.warn("[Connection] ⚠️ PROXY UNAVAILABLE — falling back to direct connection");
-  console.warn("[Connection] ⚠️ Trading will be GEO-BLOCKED. Scanning/evaluation will still work.");
-  console.warn("[Connection] ⚠️ Fix the SOCKS5 proxy at " + socksUrl + " to resume trading.");
+  // Proxy failed all retries — fall back to direct (scanning still works)
+  console.warn("[Connection] ⚠️ PROXY UNAVAILABLE after 3 attempts — falling back to direct connection");
+  console.warn("[Connection] ⚠️ Trading will likely be GEO-BLOCKED. Fix SOCKS5_PROXY_URL to resume.");
   disableProxy();
   connectionMode = "direct";
   return "direct";
@@ -180,7 +178,11 @@ export async function initializeConnection(): Promise<"proxy" | "direct" | "fail
  * Initialize the proxy (legacy API — now calls initializeConnection).
  */
 export function initializeProxy(proxyUrl?: string): boolean {
-  const socksUrl = proxyUrl || process.env.SOCKS5_PROXY_URL || "socks5://polybot:pr0xyS3cure2026@165.227.132.17:1080";
+  const socksUrl = proxyUrl || process.env.SOCKS5_PROXY_URL;
+  if (!socksUrl) {
+    console.warn("[Proxy] No proxy URL provided and SOCKS5_PROXY_URL not set");
+    return false;
+  }
   return enableProxy(socksUrl);
 }
 
@@ -199,7 +201,7 @@ export async function testProxy(): Promise<{ success: boolean; ip?: string; erro
 }
 
 /**
- * Check if trading is possible (proxy is active).
+ * Check if proxy is active (trading through proxy).
  */
 export function canTrade(): boolean {
   return isProxyActive && connectionMode === "proxy";
@@ -211,7 +213,7 @@ export function canTrade(): boolean {
 export function getProxyStatus(): { active: boolean; url: string; mode: string } {
   return {
     active: isProxyActive,
-    url: process.env.SOCKS5_PROXY_URL || "socks5://polybot:pr0xyS3cure2026@165.227.132.17:1080 (fallback)",
+    url: process.env.SOCKS5_PROXY_URL ? process.env.SOCKS5_PROXY_URL.replace(/\/\/.*@/, '//***@') : "(none)",
     mode: connectionMode,
   };
 }

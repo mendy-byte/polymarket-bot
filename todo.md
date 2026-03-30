@@ -110,3 +110,12 @@
 - [x] Fix category cap bug blocking all events when 0 positions exist
 - [x] Add Grok/xAI support to AI evaluator with fallback to default BUY
 - [x] Make AI evaluation optional — default to BUY if no key or evaluator fails
+- [x] Remove all hardcoded Frankfurt proxy URLs from proxySetup.ts
+- [x] Improve initializeConnection() to require SOCKS5_PROXY_URL for trading
+- [ ] Update .env on Singapore droplet with residential proxy placeholder
+- [ ] Deploy to Ireland droplet instead of Singapore
+- [ ] Create Ireland (LON1) droplet on DigitalOcean
+- [ ] Set up Ireland: Node.js, MySQL, clone, build, systemd
+- [ ] Configure .env with residential SOCKS5 proxy
+- [ ] Stop Singapore and Frankfurt bots
+- [ ] Deliver code changes, .env template, and proxy guide to user
