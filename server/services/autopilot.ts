@@ -152,10 +152,14 @@ function canBuyInCategory(
   totalDeployed: number,
   maxCategoryPercent: number,
 ): boolean {
+  // Bootstrap phase: when total deployed is under $100, skip category cap
+  // to allow the first orders to go through across multiple categories.
+  // Once we have enough positions, the cap kicks in to enforce diversification.
+  if (totalDeployed < 100) return true;
+
   const usage = categoryUsage.get(category) || { count: 0, totalCost: 0 };
-  const newTotal = totalDeployed + betSize;
   const newCatCost = usage.totalCost + betSize;
-  const newPercent = newTotal > 0 ? (newCatCost / newTotal) * 100 : 0;
+  const newPercent = (newCatCost / (totalDeployed + betSize)) * 100;
   return newPercent <= maxCategoryPercent;
 }
 

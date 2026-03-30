@@ -7,11 +7,12 @@
  * Score 1-2: IMPOSSIBLE - filter out (already resolved, logically impossible, team eliminated)
  * Score 3+: BUY - the event is at least theoretically possible, so we buy it
  * 
- * This matches the original planktonXD strategy: massive volume, maximum diversification.
- * The math works through uncorrelated bets, not intelligence.
+ * LLM priority:
+ * 1. XAI_API_KEY → Grok (xAI) at https://api.x.ai/v1/chat/completions
+ * 2. BUILT_IN_FORGE_API_KEY → Manus Forge (built-in)
+ * 3. No key → skip AI entirely, default to BUY (score 5) for all events
  */
 
-import { invokeLLM } from "../_core/llm";
 import type { ParsedCheapOutcome } from "./gammaApi";
 
 export interface AiEvalResult {
@@ -21,13 +22,100 @@ export interface AiEvalResult {
   recommendation: "buy" | "skip";
 }
 
+// ===== LLM Configuration =====
+function getLLMConfig(): { apiUrl: string; apiKey: string; model: string } | null {
+  // Priority 1: Grok (xAI)
+  const xaiKey = process.env.XAI_API_KEY;
+  if (xaiKey && xaiKey.trim().length > 0) {
+    return {
+      apiUrl: "https://api.x.ai/v1/chat/completions",
+      apiKey: xaiKey,
+      model: "grok-3-mini",
+    };
+  }
+
+  // Priority 2: Manus Forge (built-in)
+  const forgeKey = process.env.BUILT_IN_FORGE_API_KEY;
+  const forgeUrl = process.env.BUILT_IN_FORGE_API_URL;
+  if (forgeKey && forgeKey.trim().length > 0) {
+    const baseUrl = forgeUrl && forgeUrl.trim().length > 0
+      ? `${forgeUrl.replace(/\/$/, "")}/v1/chat/completions`
+      : "https://forge.manus.im/v1/chat/completions";
+    return {
+      apiUrl: baseUrl,
+      apiKey: forgeKey,
+      model: "gemini-2.5-flash",
+    };
+  }
+
+  // No key available
+  return null;
+}
+
+async function callLLM(messages: Array<{ role: string; content: string }>, responseFormat: any): Promise<any> {
+  const config = getLLMConfig();
+  if (!config) {
+    throw new Error("No LLM API key available");
+  }
+
+  const payload: Record<string, unknown> = {
+    model: config.model,
+    messages,
+    max_tokens: 4096,
+  };
+
+  if (responseFormat) {
+    payload.response_format = responseFormat;
+  }
+
+  const response = await fetch(config.apiUrl, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      authorization: `Bearer ${config.apiKey}`,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`LLM call failed: ${response.status} ${response.statusText} – ${errorText}`);
+  }
+
+  return await response.json();
+}
+
+// ===== Default BUY result for when AI is unavailable =====
+function defaultBuyResult(reason: string): AiEvalResult {
+  return {
+    score: 5,
+    reasoning: reason,
+    isImpossible: false,
+    recommendation: "buy",
+  };
+}
+
 /**
  * Evaluate a batch of cheap outcomes using AI.
  * The AI is ONLY asked: "Is this event literally impossible?"
  * Batches up to 15 events per LLM call for efficiency.
+ * 
+ * If no LLM key is available, ALL events default to BUY (score 5).
  */
 export async function evaluateBatch(outcomes: ParsedCheapOutcome[]): Promise<Map<string, AiEvalResult>> {
   const results = new Map<string, AiEvalResult>();
+
+  // Check if any LLM is available
+  const llmConfig = getLLMConfig();
+  if (!llmConfig) {
+    console.log("[AI Evaluator] No LLM API key configured — defaulting ALL events to BUY");
+    for (const o of outcomes) {
+      results.set(o.marketId + "_" + o.outcomeIndex, defaultBuyResult("No AI key — auto-approved"));
+    }
+    return results;
+  }
+
+  console.log(`[AI Evaluator] Using ${llmConfig.model} via ${llmConfig.apiUrl.includes("x.ai") ? "Grok/xAI" : "Forge"}`);
 
   // Process in batches of 15 (larger batches since we need less analysis per event)
   for (let i = 0; i < outcomes.length; i += 15) {
@@ -41,12 +129,7 @@ export async function evaluateBatch(outcomes: ParsedCheapOutcome[]): Promise<Map
       console.error(`[AI Evaluator] Batch error:`, err);
       // On failure, DEFAULT TO BUY (score 5) - we want to buy everything possible
       for (const o of batch) {
-        results.set(o.marketId + "_" + o.outcomeIndex, {
-          score: 5,
-          reasoning: "AI evaluation failed - defaulting to buy (reject-only filter)",
-          isImpossible: false,
-          recommendation: "buy",
-        });
+        results.set(o.marketId + "_" + o.outcomeIndex, defaultBuyResult("AI evaluation failed — defaulting to buy"));
       }
     }
     // Rate limit between batches
@@ -61,11 +144,7 @@ async function evaluateBatchInternal(outcomes: ParsedCheapOutcome[]): Promise<Ma
     return `[${idx + 1}] "${o.question}" - Outcome: "${o.outcome}" at $${o.price.toFixed(4)} | Category: ${o.category} | Resolves: ${new Date(o.endDate).toLocaleDateString()} (${o.hoursToResolution}h)`;
   }).join("\n");
 
-  const response = await invokeLLM({
-    messages: [
-      {
-        role: "system",
-        content: `You are a prediction market filter. Your ONLY job is to identify events that are LITERALLY IMPOSSIBLE.
+  const systemPrompt = `You are a prediction market filter. Your ONLY job is to identify events that are LITERALLY IMPOSSIBLE.
 
 You are NOT scoring how likely events are. Everything priced under 3 cents is already extremely unlikely - that's the whole point. We WANT to buy unlikely events.
 
@@ -88,11 +167,9 @@ Examples of things that ARE possible and should score 3+:
 - Massive sports upsets
 - Unlikely crypto price targets
 - Rare weather events
-- Low-probability scientific discoveries`,
-      },
-      {
-        role: "user",
-        content: `For each event below, determine ONLY whether it is literally impossible. Score 1-2 if impossible, 3+ if theoretically possible (even if extremely unlikely).
+- Low-probability scientific discoveries`;
+
+  const userPrompt = `For each event below, determine ONLY whether it is literally impossible. Score 1-2 if impossible, 3+ if theoretically possible (even if extremely unlikely).
 
 ${eventsDescription}
 
@@ -106,10 +183,14 @@ Respond in JSON format:
       "is_impossible": false
     }
   ]
-}`,
-      },
+}`;
+
+  const response = await callLLM(
+    [
+      { role: "system", content: systemPrompt },
+      { role: "user", content: userPrompt },
     ],
-    response_format: {
+    {
       type: "json_schema",
       json_schema: {
         name: "event_filter",
@@ -137,9 +218,9 @@ Respond in JSON format:
         },
       },
     },
-  });
+  );
 
-  const content = response.choices[0]?.message?.content;
+  const content = response.choices?.[0]?.message?.content;
   if (!content || typeof content !== "string") {
     throw new Error("Empty AI response");
   }
@@ -178,10 +259,5 @@ Respond in JSON format:
 export async function evaluateSingle(outcome: ParsedCheapOutcome): Promise<AiEvalResult> {
   const results = await evaluateBatch([outcome]);
   const key = outcome.marketId + "_" + outcome.outcomeIndex;
-  return results.get(key) || {
-    score: 5,
-    reasoning: "Evaluation unavailable - defaulting to buy",
-    isImpossible: false,
-    recommendation: "buy",
-  };
+  return results.get(key) || defaultBuyResult("Evaluation unavailable — defaulting to buy");
 }

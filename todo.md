@@ -105,5 +105,8 @@
 - [x] Show Real P&L on dashboard (starting capital minus current wallet balance)
 - [x] Set up Telegram alert secrets (TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID)
 - [x] Wire Telegram alerts into autopilot cycle events
-- [ ] Set up nginx reverse proxy on Frankfurt droplet to expose dashboard at http://165.227.132.17
-- [ ] Add simple password-based login bypass for standalone droplet deployment
+- [x] Set up nginx reverse proxy on Frankfurt droplet to expose dashboard at http://165.227.132.17
+- [x] Add simple password-based login bypass for standalone droplet deployment
+- [x] Fix category cap bug blocking all events when 0 positions exist
+- [x] Add Grok/xAI support to AI evaluator with fallback to default BUY
+- [x] Make AI evaluation optional — default to BUY if no key or evaluator fails
