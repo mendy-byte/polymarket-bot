@@ -59,9 +59,11 @@ async function startServer() {
       });
       // Create session JWT
       const token = await sdk.createSessionToken(ownerOpenId, { name: ownerName });
-      const cookieOptions = getSessionCookieOptions(req);
       res.cookie(COOKIE_NAME, token, {
-        ...cookieOptions,
+        httpOnly: true,
+        path: "/",
+        sameSite: "lax",
+        secure: false,
         maxAge: 365 * 24 * 60 * 60 * 1000, // 1 year
       });
       return res.json({ success: true });
